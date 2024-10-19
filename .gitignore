@@ -1,0 +1,9 @@
+# system files
+.ash_history
+
+# log fles - nginx
+*.log
+*.log.*.gz
+
+# update log files - ddns
+updates.json

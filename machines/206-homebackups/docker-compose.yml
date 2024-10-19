@@ -1,0 +1,28 @@
+services:
+  samba:
+    image: dperson/samba
+    environment:
+      TZ: 'EST5EDT'
+    networks:
+      - default
+    ports:
+      - "137:137/udp"
+      - "138:138/udp"
+      - "139:139/tcp"
+      - "445:445/tcp"
+    read_only: false
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./samba/homeassistantbackup:/homeassistantbackup:z
+    command: '-s "homeassistantbackup;/homeassistantbackup;yes;no;no" -u "${SAMBA_USER};${SAMBA_PASSWORD}" -r -p'
+# browsable = yes/no
+# guest ok = yes/no
+# read only = yes/no
+# -p: set ownership and permission
+# -r: disable recyclebin
+networks:
+  default:

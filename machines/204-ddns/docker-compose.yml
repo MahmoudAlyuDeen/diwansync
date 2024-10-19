@@ -1,0 +1,19 @@
+services:
+  ddns-updater:
+    image: qmcgaw/ddns-updater
+    container_name: ddns-updater
+    user: 0:0
+    network_mode: bridge
+    ports:
+      - 8000:8000/tcp
+    volumes:
+      - ./ddnsupdater/data:/updater/data
+    environment:
+      -  PERIOD=5m
+      -  IP_METHOD=cycle
+      -  IPV4_METHOD=cycle
+      -  IPV6_METHOD=cycle
+      -  HTTP_TIMEOUT=10s
+      -  LISTENING_PORT=8000
+      -  ROOT_URL=/
+    restart: always
