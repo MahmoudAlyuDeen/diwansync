@@ -1,0 +1,30 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+wake_on_lan: # enables `wake_on_lan` integration
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+group: !include groups.yaml
+
+auth_header:
+    username_header: X-authentik-username
+    allow_bypass_login: false
+    debug: false
+
+http:
+    server_port: 8000
+    # add base URL here
+    base_url: http://home.domain.tld
+    ip_ban_enabled: true
+    login_attempts_threshold: 15
+    use_x_forwarded_for: true
+    trusted_proxies:
+    - 192.168.1.203
+    - 192.168.1.207
+

@@ -1,0 +1,208 @@
+- id: '1715292929252'
+  alias: Lights Off
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: '-1800'
+  - platform: state
+    entity_id:
+    - scene.lights_off
+  condition: []
+  action:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.leds_off
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.ceiling_light
+  mode: single
+- id: '1716510563495'
+  alias: Lights On
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: '1800'
+    enabled: false
+  - platform: state
+    entity_id:
+    - scene.lights_on
+  condition: []
+  action:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.leds_on
+  - action: input_boolean.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.ceiling_light
+  mode: single
+  variables:
+    icon: lamp-wall-up
+- id: '1716596144091'
+  alias: LG webOS Smart TV - Turn On Action
+  description: ''
+  use_blueprint:
+    path: cvroque/webostv_turn_on.yaml
+    input:
+      webostv: efc7f5e2a5ce6990e7da4f340f891bf7
+      webostv_mac: F8-B9-5A-66-C8-2E
+- id: '1724970268666'
+  alias: Fake Ceiling Light Dim
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.ceiling_light
+    to: 'on'
+    enabled: true
+  - platform: numeric_state
+    entity_id:
+    - input_number.ceiling_light
+    above: 0
+    below: 2
+    enabled: true
+  - platform: state
+    entity_id:
+    - scene.ceiling_dim
+  condition:
+  - condition: numeric_state
+    entity_id: input_number.ceiling_light
+    below: 2
+    enabled: true
+  action:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.ceiling_light_dim
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.ceiling_light
+    data:
+      value: 1
+    enabled: true
+  - action: input_boolean.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.ceiling_light
+    enabled: true
+  mode: single
+- id: '1724970324788'
+  alias: Fake Ceiling Light Off
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.ceiling_light
+    to: 'off'
+  - platform: numeric_state
+    entity_id:
+    - input_number.ceiling_light
+    below: 1
+  - platform: state
+    entity_id:
+    - scene.ceiling_off
+  condition: []
+  action:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.ceiling_light_off
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.ceiling_light
+  - action: input_number.set_value
+    metadata: {}
+    data:
+      value: 0
+    target:
+      entity_id: input_number.ceiling_light
+  mode: single
+- id: '1725152954929'
+  alias: Fake Ceiling Light Bright
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - input_number.ceiling_light
+    above: 1
+    enabled: true
+  - platform: state
+    entity_id:
+    - scene.ceiling_bright
+  condition: []
+  action:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.ceiling_light_bright
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.ceiling_light
+    data: {}
+    enabled: true
+  - action: input_number.set_value
+    metadata: {}
+    data:
+      value: 2
+    target:
+      entity_id: input_number.ceiling_light
+    enabled: true
+  mode: single
+- id: '1725986740846'
+  alias: Weekly backup
+  description: ''
+  trigger:
+  - platform: time
+    at: 01:00:00
+  condition:
+  - condition: time
+    weekday:
+    - sun
+  action:
+  - action: hassio.backup_full
+    metadata: {}
+    data:
+      compressed: true
+      homeassistant_exclude_database: false
+  mode: single
+- id: '1726114340364'
+  alias: Everything Off on Leave Home
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - scene.leave_home
+  condition: []
+  action:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.everything_off
+  mode: single
+- id: '1726114606730'
+  alias: LEDs On on Arrive Home at night
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - scene.arrive_home
+  condition:
+  - condition: sun
+    after: sunset
+    before: sunrise
+  action:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.leds_on
+  mode: single

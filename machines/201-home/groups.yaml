@@ -1,0 +1,8 @@
+ceiling:
+    name: "Ceiling"
+    entities:
+        - input_boolean.ceiling_light
+        - input_number.ceiling_light
+        - scene.ceiling_bright
+        - scene.ceiling_dim
+        - scene.ceiling_off

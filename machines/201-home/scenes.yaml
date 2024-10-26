@@ -1,0 +1,129 @@
+- id: '1724105634036'
+  name: AC on
+  entities:
+    switch.ac:
+      device_class: outlet
+      icon: mdi:air-conditioner
+      friendly_name: AC
+      state: 'on'
+  icon: mdi:air-conditioner
+  metadata: {}
+- id: '1724105664969'
+  name: AC off
+  entities:
+    switch.ac:
+      device_class: outlet
+      icon: mdi:air-conditioner
+      friendly_name: AC
+      state: 'off'
+  icon: mdi:air-conditioner
+  metadata: {}
+- id: '1724105788114'
+  name: LEDs on
+  entities:
+    switch.leds:
+      friendly_name: LEDs
+      entity_id:
+      - switch.desk_light
+      - switch.sofa_light
+      state: 'on'
+  icon: mdi:led-strip-variant
+  metadata:
+    switch.leds:
+      entity_only: true
+- id: '1724106016145'
+  name: LEDs off
+  entities:
+    switch.leds:
+      friendly_name: LEDs
+      entity_id:
+      - switch.desk_light
+      - switch.sofa_light
+      state: 'off'
+  icon: mdi:led-strip-variant-off
+  metadata:
+    switch.leds:
+      entity_only: true
+- id: '1724883564032'
+  name: Everything Off
+  entities:
+    switch.ac:
+      device_class: outlet
+      icon: mdi:air-conditioner
+      friendly_name: AC
+      state: 'off'
+    media_player.bedroom_tv_2:
+      source_list:
+      - Home Dashboard
+      - PC
+      - Streaming Box
+      assumed_state: true
+      device_class: tv
+      friendly_name: TV
+      supported_features: 24509
+      state: 'off'
+    switch.desk_light:
+      device_class: outlet
+      icon: mdi:led-strip-variant
+      friendly_name: Desk Light
+      state: 'off'
+    switch.sofa_light:
+      device_class: outlet
+      icon: mdi:led-strip-variant
+      friendly_name: Sofa Light
+      state: 'off'
+    switch.leds:
+      entity_id:
+      - switch.desk_light
+      - switch.sofa_light
+      friendly_name: LEDs
+      state: 'off'
+    input_boolean.ceiling_light:
+      editable: true
+      icon: mdi:ceiling-light
+      friendly_name: Ceiling Light
+      state: 'off'
+  icon: mdi:home-off
+  metadata:
+    switch.leds:
+      entity_only: true
+    input_boolean.ceiling_light:
+      entity_only: true
+- id: '1725336728077'
+  name: Ceiling Dim
+  entities:
+    input_number.ceiling_light:
+      initial:
+      editable: true
+      min: 0
+      max: 2
+      step: 1
+      mode: slider
+      unit_of_measurement: Bright
+      icon: mdi:ceiling-light
+      friendly_name: Ceiling Light
+      state: '1.0'
+  icon: mdi:ceiling-light-outline
+  metadata:
+    input_number.ceiling_light:
+      entity_only: true
+- id: '1725336830009'
+  name: Ceiling Off
+  entities: {}
+  icon: mdi:toggle-switch-variant-off
+  metadata: {}
+- id: '1725336878347'
+  name: Ceiling Bright
+  entities: {}
+  icon: mdi:ceiling-light-multiple
+  metadata: {}
+- id: '1726113451682'
+  name: Arrive Home
+  entities: {}
+  icon: mdi:home
+  metadata: {}
+- id: '1726113648676'
+  name: Leave Home
+  entities: {}
+  icon: mdi:home-off
+  metadata: {}
