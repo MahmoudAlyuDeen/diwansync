@@ -1,0 +1,16 @@
+services:
+    goaccess:
+        image: 'xavierh/goaccess-for-nginxproxymanager:v1.1.30'
+        container_name: goaccess
+        restart: always
+        ports:
+            - '8000:7880'
+        environment:
+            - TZ=Europe/Berlin
+            - SKIP_ARCHIVED_LOGS=False
+            - LOG_TYPE=NPM+ALL
+            - HTML_REFRESH=5
+            - KEEP_LAST=30
+            - PROCESSING_THREADS=4
+        volumes:
+        - ./logs:/opt/log
