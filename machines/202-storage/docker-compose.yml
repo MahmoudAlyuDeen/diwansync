@@ -5,8 +5,8 @@ services:
         command: ["--noauth"]
         volumes:
             - /mnt:/srv:rw
-            - ./branding:/branding
             - ./config.json:/.filebrowser.json
+            - ./filebrowser/branding:/branding
             - ./filebrowser/database.db:/database.db
         ports:
             - 8000:80
