@@ -1,0 +1,154 @@
+backup:
+  database:
+    cronExpression: 0 07 * * sun
+    enabled: true
+    keepLastAmount: 10
+ffmpeg:
+  accel: disabled
+  accelDecode: false
+  acceptedAudioCodecs:
+  - aac
+  - mp3
+  - libopus
+  acceptedContainers:
+  - mov
+  - ogg
+  - webm
+  acceptedVideoCodecs:
+  - h264
+  bframes: -1
+  cqMode: auto
+  crf: 23
+  gopSize: 0
+  maxBitrate: '0'
+  npl: 0
+  preferredHwDevice: auto
+  preset: ultrafast
+  refs: 0
+  targetAudioCodec: aac
+  targetResolution: original
+  targetVideoCodec: h264
+  temporalAQ: false
+  threads: 0
+  tonemap: disabled
+  transcode: disabled
+  twoPass: false
+image:
+  colorspace: p3
+  extractEmbedded: false
+  preview:
+    format: jpeg
+    quality: 80
+    size: 1440
+  thumbnail:
+    format: webp
+    quality: 80
+    size: 250
+job:
+  backgroundTask:
+    concurrency: 5
+  faceDetection:
+    concurrency: 2
+  library:
+    concurrency: 5
+  metadataExtraction:
+    concurrency: 5
+  migration:
+    concurrency: 5
+  notifications:
+    concurrency: 5
+  search:
+    concurrency: 5
+  sidecar:
+    concurrency: 5
+  smartSearch:
+    concurrency: 2
+  thumbnailGeneration:
+    concurrency: 3
+  videoConversion:
+    concurrency: 4
+library:
+  scan:
+    cronExpression: 0 0 * * *
+    enabled: true
+  watch:
+    enabled: false
+logging:
+  enabled: true
+  level: log
+machineLearning:
+  clip:
+    enabled: true
+    modelName: ViT-B-32__openai
+  duplicateDetection:
+    enabled: true
+    maxDistance: 0.01
+  enabled: true
+  facialRecognition:
+    enabled: true
+    maxDistance: 0.5
+    minFaces: 3
+    minScore: 0.7
+    modelName: buffalo_l
+  urls:
+  - http://immich-machine-learning:3003
+map:
+  darkStyle: https://tiles.immich.cloud/v1/style/dark.json
+  enabled: true
+  lightStyle: https://tiles.immich.cloud/v1/style/light.json
+metadata:
+  faces:
+    import: false
+newVersionCheck:
+  enabled: false
+notifications:
+  smtp:
+    enabled: false
+    from: ''
+    replyTo: ''
+    transport:
+      host: ''
+      ignoreCert: false
+      password: ''
+      port: 587
+      username: ''
+oauth:
+  autoLaunch: false
+  autoRegister: false
+  buttonText: Use a security key
+  clientId: ${CONFIG_OAUTH_CLIENT_ID}
+  clientSecret: ${CONFIG_OAUTH_CLIENT_SECRET}
+  defaultStorageQuota: 0
+  enabled: true
+  issuerUrl: ${CONFIG_OAUTH_ISSUER_URL}
+  mobileOverrideEnabled: false
+  mobileRedirectUri: ''
+  profileSigningAlgorithm: none
+  scope: openid email username
+  signingAlgorithm: RS256
+  storageLabelClaim: username
+  storageQuotaClaim: immich_quota
+passwordLogin:
+  enabled: true
+reverseGeocoding:
+  enabled: true
+server:
+  externalDomain: ${CONFIG_EXTERNAL_DOMAIN}
+  loginPageMessage: Enter login information
+  publicUsers: true
+storageTemplate:
+  enabled: true
+  hashVerificationEnabled: true
+  template: "{{y}}-{{MM}}-{{dd}}_{{HH}}-{{mm}}-{{ss}}_{{filename}}"
+templates:
+  email:
+    albumInviteTemplate: ''
+    albumUpdateTemplate: ''
+    welcomeTemplate: ''
+theme:
+  customCss: ''
+trash:
+  days: 30
+  enabled: true
+user:
+  deleteDelay: 7
