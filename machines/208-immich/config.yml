@@ -113,7 +113,7 @@ notifications:
       port: 587
       username: ''
 oauth:
-  autoLaunch: false
+  autoLaunch: true
   autoRegister: false
   buttonText: Use a security key
   clientId: ${CONFIG_OAUTH_CLIENT_ID}
