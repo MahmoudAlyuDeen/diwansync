@@ -1,0 +1,14 @@
+server:
+  port: 80
+  sources:
+    - path: "/mnt/storage"
+    - path: "/mnt/backup"
+auth:
+  signup: false
+  methods:
+    noauth: true
+frontend:
+  name: "AlyuDeen Storage"
+userDefaults:
+  darkMode: false
+  viewMode: "list"

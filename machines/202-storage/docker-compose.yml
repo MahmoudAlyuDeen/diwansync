@@ -1,15 +1,10 @@
 services:
-    filebrowser:
-        container_name: filebrowser
-        user: 0:0
-        command: ["--noauth"]
-        volumes:
-            - /mnt:/srv:rw
-            - ./config.json:/.filebrowser.json
-            - ./filebrowser/branding:/branding
-            - ./filebrowser/database.db:/database.db
-        ports:
-            - 8000:80
-        image: filebrowser/filebrowser
-        restart: unless-stopped
-
+  filebrowser:
+    user: 0:0
+    volumes:
+      - /mnt:/mnt:rw
+      - ./config.yaml:/home/filebrowser/config.yaml
+    ports:
+      - '8000:80'
+    image: gtstef/filebrowser
+    restart: unless-stopped
