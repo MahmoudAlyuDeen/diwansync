@@ -1,6 +1,6 @@
 # Introduction
 
-A private personal server hosting photos and files.
+A private personal server hosting photos and files with automatic photo backup and sharing capabilities.
 
 Running on cheap, refurbished, low powered, and portable machines at home.
 
@@ -9,12 +9,75 @@ Securely accessible everywhere, completely free.
 - [File sharing demo](https://storage.alyudeen.mywire.org/share/P51zqRA8K_PZxDp-yKDLHw)
 - [Photo sharing demo](https://immich.mahmoud.alyudeen.mywire.org/share/lbG8F_Ag2aipTvQkJQpvoLSe6KIqyTp0sCX8Gey5nhlDSHmHZTwqUhDmWT2qSZP8QfI)
 
-# This Repository Structure
+# Index
 
-### Proxmox machine configuration
-### utils
+- This repository
+  - Structure
+  - Secrets and environment files
+  - Assumptions
+  - Utilities
+  - Docker Compose
+
+# This Repository
+
+This repository aims document iterative changes and to be a guide to replicate the full setup or parts of it as easy as possible.
+
+### Assumptions
+
+Proxmox is installed on the main machine with 3 storage
+
+- [images/proxmox-storage-configuration](images/proxmox-storage-configuration)
+- `local`
+  - The boot storage on which `ProxmoxVE` is installed.
+  - Used to store all running VMs and containers.
+- `storage`
+  - A logically (or also phyisically) separate storage from `local` boot storage.
+  - Needed for functionality of `202-storage` / `206-homebackups` / `20#-immich`.
+  - Contains secrets for `203-nginx` / `204-ddns` / `206-homebackups` / `207-auth` / `20#-immich`.
+  - The config files can be edited to remove or alter these requirement.
+- `backup`
+  - Network storage accessing another machine.
+  - Needed for accessing backup files on `202-storage`.
+
+## Structure
+
+- Proxmox linux container (lxc) configuration: [/config](/config)
+  - With the exception of Home Assistant, all services are running on simple lxc containers running under Proxmox.
+  - All lxc containers are based on lightweight Apline Linux, except `22#-immich` which is based on Debian.
+  - Created using Proxmox VE Helper scripts: https://tteck.github.io/Proxmox/ for simple setup.
+  - Manual lxc creation guide: https://youtu.be/gHBSrENzeqk
+  - Helper scripts guide: https://youtu.be/kcpu4z5eSEU
+  - Example: [202.conf](/config/202.conf)
+    - storage mount `mp0: /mnt/pve/storage,mp=/mnt/storage`
+    - backup mount: `mp1: /mnt/pve/backup,mp=/mnt/backup`
+
+### Mountpoints, Secrets and Environment Variables
+
+The docker compose files and configuration files are hosted in this repository, cloned by the Main Node machine, and distributed to containers.
+Example: TBD
+
+To avoid posting environment variables - access tokens and secrets - to this repository, they're accessed from mounted storage folders.
+
+- Docker `.env` files are accessed using symlink (shortcut) files.
+  - Example: [/machines/207-auth/.env](/machines/207-auth/.env) -> [/207-auth/authentik/example.env](/207-auth/authentik/example.env)
+  - This enables storing environment variables in mounted `storage` folders for safekeeping.
+  - Example: [/config/207.conf](/config/207.conf)
+  - `mp0: /root/homelab/machines/207-auth,mp=/root/207`
+    - monutpoint 0 mounts configuration under `/root/207` 
+  - `mp1: /mnt/pve/storage/containers/authentik,mp=/root/207/authentik`
+    - mountpoint 1 mounts the `storage` folder inside the folder mounted by mountpoint 0
+   
+Resulting folder structure in the lxe container:
+- root
+  - 207
+    - .env
+    - authentik
+      - .env
+
+This setup can be completely skipped or significantly simplified for personal use, placing `docker-compsoe.yml` and `.env` and other configuration files in each container.
+
+### Utilities
 ### docker compose files
-### Secrets and environment variables
 
 # System details
 
@@ -28,9 +91,10 @@ Runs services in isolation in separate virtual machines or lightweight linux con
 
 ### Recommended terminal utilities
 
-- [lazygit](https://github.com/jesseduffield/lazygit): GUI git client.
+- GUI git client:
   - https://github.com/jesseduffield/lazygit?tab=readme-ov-file#ubuntu
-- [Midnight Commander](https://github.com/MidnightCommander/mc): File manager.
+- GUI File manager
+  - https://github.com/MidnightCommander/mc
   - https://askubuntu.com/questions/1071392/how-can-i-install-midnight-commander-on-ubuntu-18-04-1
 
 ### Hosted Services
