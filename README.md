@@ -107,6 +107,8 @@ Example: [202.conf](/config/202.conf)
   - `backup` mount: `mp1: /mnt/pve/backup,mp=/mnt/backup`
   - Service config mount: `mp2: /root/homelab/machines/202-storage,mp=/root/202`
 
+Result: [images/202-files-folder-structure](images/202-files-folder-structure.png)
+
 ## Docker compose, Linux Containers `lxc`, and `VMs`
 
 under [/machines](/machines)
@@ -118,13 +120,10 @@ Each docker service is deployed on a separate `lxc` container using a dedicated 
 Service folders are cloned by the `Main Node` machine from this repository and distributed to `lxc` containers using `ProxmoxVE` mountpoints.
 
 #### Service folder structure
-- `docker-compose.yml`.
+- `docker-compose.yml`
 - `.env` file (if needed)
 - Config file (if needed)
-
-Example: [/machines/202-storage/](/machines/202-storage/)
-
-Result: [images/202-files-folder-structure](images/202-files-folder-structure.png)
+- Example: [/machines/202-storage/](/machines/202-storage/)
 
 #### Secrets, Environment Variables, and service files
 
