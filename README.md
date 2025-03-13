@@ -6,7 +6,7 @@ Running on cheap or refurbished low-powered portable machines.
 
 Securely accessible everywhere. Completely free.
 
-#### Demo
+## Demo
 
 **Public**
 - [File sharing demo](https://storage.alyudeen.mywire.org/share/P51zqRA8K_PZxDp-yKDLHw)
@@ -15,9 +15,11 @@ Securely accessible everywhere. Completely free.
 **Private**
 - See yourself get locked out trying to access https://storage.alyudeen.mywire.org/
 
-#### This Repository
+## This Repository
 
-This repository aims to document iterative changes, and to be a guide to replicate the full setup or parts of it as easy as possible.
+This repository aims to document iterative changes, and to be a guide to replicate the full setup or parts of it as easily as possible.
+
+Questions are welcome, please file an issue or start a discussion. PRs are welcome for improvments.
 
 # Services
 
