@@ -8,13 +8,13 @@ Diwān - دِيوَان is a central official registry with a collection of writ
 
 # At a Glance
 
-A free blueprint for a private personal server hosting photos and files.
+- A free blueprint for a private personal server hosting photos and files.
 
-Automatic photo backup and sharing capabilities.
+- Automatic photo backup and sharing capabilities.
 
-Runs on cheap refurbished hardware and scales to enterprise systems if required.
+- Runs on cheap refurbished hardware and scales to enterprise systems if required.
 
-Securely accessible everywhere. Open source. 100% free.
+- Securely accessible everywhere. Open source. 100% free.
 
 ### Demo
 
@@ -27,13 +27,15 @@ Securely accessible everywhere. Open source. 100% free.
 
 # This Repository
 
-This repository aims to document iterative changes, and to be a guide to replicate the full setup or parts of it as easily as possible.
+This repository aims to document iterative changes for myself, and to be a guide to replicate the full setup or parts of it as easily as possible.
 
-Questions are welcome, please file an issue or start a discussion. PRs are welcome for improvements.
+If you're looking to move away from relying on big tech companies to manage your files and photos, you're welcome to reach out. I'm happy to help!
 
-### New to private servers?
+Feel free to ask questions by filing an issue or starting a discussion. Pull requests for improvements are also always appreciated.
 
-Try parts of this setup on `Docker Desktop` on your any computer before comitting to buying any hardware!
+### New to server management?
+
+Don't worry; we all started somewhere. Try parts of this setup on `Docker Desktop` on any computer before investing in hardware.
 
 ### Steps:
 
@@ -44,8 +46,6 @@ Try parts of this setup on `Docker Desktop` on your any computer before comittin
    Use the provided `docker-compose` configurations to run the services in containers.
 4. **Access the Services**:  
    Follow the guides and instructions below to access services locally.
-
-Experiment on your computer and move to hardware when you're ready.
 
 # Services
 
