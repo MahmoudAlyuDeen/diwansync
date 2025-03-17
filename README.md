@@ -1,12 +1,22 @@
-# Introduction
+# DiwanSync - Private Cloud Blueprint
 
-A private personal server hosting photos and files with automatic photo backup and sharing capabilities.
+<img width="800" src="images/diwan.jpg">
 
-Running on cheap or refurbished low-powered portable machines.
+```
+Diwān - دِيوَان is a central official registry with a collection of written records.
+```
 
-Securely accessible everywhere. Completely free.
+# At a Glance
 
-## Demo
+A free blueprint for a private personal server hosting photos and files.
+
+Automatic photo backup and sharing capabilities.
+
+Runs on cheap refurbished hardware and scales to enterprise systems if required.
+
+Securely accessible everywhere. Open source. 100% free.
+
+### Demo
 
 **Public**
 - [File sharing demo](https://storage.alyudeen.mywire.org/share/P51zqRA8K_PZxDp-yKDLHw)
@@ -15,22 +25,42 @@ Securely accessible everywhere. Completely free.
 **Private**
 - See yourself get locked out trying to access https://storage.alyudeen.mywire.org/
 
-## This Repository
+# This Repository
 
 This repository aims to document iterative changes, and to be a guide to replicate the full setup or parts of it as easily as possible.
 
-Questions are welcome, please file an issue or start a discussion. PRs are welcome for improvments.
+Questions are welcome, please file an issue or start a discussion. PRs are welcome for improvements.
+
+### New to private servers?
+
+Try parts of this setup on `Docker Desktop` on your any computer before comitting to buying any hardware!
+
+### Steps:
+
+1. **Install Docker Desktop**: https://www.docker.com/products/docker-desktop
+2. **Clone this Repository**:  
+   Download the DiwanSync repository to your local machine.
+3. **Try Docker Compose**:  
+   Use the provided `docker-compose` configurations to run the services in containers.
+4. **Access the Services**:  
+   Follow the guides and instructions below to access services locally.
+
+Experiment on your computer and move to hardware when you're ready.
 
 # Services
 
-## Main Node
+Each service provides a key function of the system; Services can be picked and customized to fit personal needs, with space for addition. Each service has its own active community that provides support for specific needs.
+
+My example setup is split between 1 active "Main Node" that runs all the services, and one passive "Backup Node" to provide a backup for redundancy and disaster recovery. I plan to add a "Remote Node" later to add geographical destribution.
+
+### Main Node
 
 - `201-home`
   - Purpose: Control lights and smart devices from web and mobile apps.
   - Project: https://www.home-assistant.io
   - Link: https://home.alyudeen.mywire.org/
 - `202-storage`
-  - Purpose: Access and share files from a web browswer
+  - Purpose: Access and share files from a web browser
   - Project: https://github.com/gtsteffaniak/filebrowser
   - Link: https://storage.alyudeen.mywire.org/
 - `203-nginx`
@@ -50,7 +80,7 @@ Questions are welcome, please file an issue or start a discussion. PRs are welco
   - Project: https://github.com/dperson/samba
   - Notes: A "full" backup automatically restores all configuration, automations, scenes, and device connections.
 - `207-auth`
-  - Purpose: Require 2 factor authentication to access services and enable passwordlesss login.
+  - Purpose: Require 2 factor authentication to access services and enable passwordless login.
   - Project: https://github.com/goauthentik/authentik
   - Link: https://auth.alyudeen.mywire.org/
 - `209-logs`
@@ -62,7 +92,7 @@ Questions are welcome, please file an issue or start a discussion. PRs are welco
   - Project: https://github.com/immich-app/immich
   - Link: https://immich.mahmoud.alyudeen.mywire.org/
 
-## Backup Node
+### Backup Node
 
 - **Operating system**: Windows.
 - **Hosted service**: Syncthing.
@@ -82,7 +112,7 @@ https://www.proxmox.com/en/
   - The boot storage on which `ProxmoxVE` is installed.
   - Used to store all running VMs and containers.
 - `storage`
-  - A logically (or also phyisically) separate storage from `local` boot storage.
+  - A logically (or also physically) separate storage from `local` boot storage.
   - Needed for functionality of `202-storage` / `206-homebackups` / `20#-immich`.
   - Contains secrets for `203-nginx` / `204-ddns` / `206-homebackups` / `207-auth` / `20#-immich`.
   - The config files can be edited to remove or alter these requirement.
@@ -96,19 +126,38 @@ Result: [images/proxmox-storage-configuration](images/proxmox-storage-configurat
 
 ## Repository Structure
 
-## Config files
+## [/machines](/machines)
 
-Under [/config](/config)
+Service service folders are cloned by the `Main Node` machine from this repository and distributed to `lxc` containers using `ProxmoxVE` mountpoints.
+
+Each docker service is deployed on a separate `lxc` container using a dedicated docker compose file.
+
+ℹ️ `201-home`: Only `Home Assistant Operating System` runs on a VM, not a container.
+
+## [/config](/config)
 
 `ProxmoxVE` uses `VMID.conf` files to store VM and container hardware configuration, mountpoints, and network configuration.
 
 Config files are maintained by `ProxmoxVE` - under `/etc/pve/lxc`. They are copied over to this repository.
 
+## [/utils](/utils)
+
+Provided `symlinks` for easier navigation to relevent folders under the `ProxmoxVE` folder structure:
+- Containers' `.conf` files: [/utils/lxcconf](/utils/lxcconf)
+- Containers' mounts using `pct mount <vmid>` for maintainance: [/utils/lxcmounts](/utils/lxcmounts)
+  - https://pve.proxmox.com/pve-docs/pct.1.html
+
+## Notes
+
+#### Service folder structure
+- `docker-compose.yml`
+- `.env` file (if needed)
+- Config file (if needed)
+- Example: [/machines/202-storage/](/machines/202-storage/)
+
 #### Mountpoints
 
-Mountpoints "mount" / expose / inject folders from the host machine -> into folders in the hosted container. They are used here to distribute storage paths, service configuration files, secrets, and files created by the service.
-
-💡 This setup can be made simpler for private use by placing everything in the same folder.
+`ProxmoxVE` mountpoints "mount" / expose / inject folders from the host machine -> into folders in the hosted container. They are used here to distribute storage paths, service configuration files, secrets, and files created by the service.
 
 Example: [202.conf](/config/202.conf)
   - `storage` mount `mp0: /mnt/pve/storage,mp=/mnt/storage`
@@ -117,47 +166,26 @@ Example: [202.conf](/config/202.conf)
 
 Result: [images/202-files-folder-structure](images/202-files-folder-structure.png)
 
-## Docker compose, Linux Containers `lxc`, and `VMs`
-
-under [/machines](/machines)
-
-ℹ️ `201-home`: Only `Home Assistant Operating System` runs on a VM, not a container.
-
-Each docker service is deployed on a separate `lxc` container using a dedicated docker compose file.
-
-Service folders are cloned by the `Main Node` machine from this repository and distributed to `lxc` containers using `ProxmoxVE` mountpoints.
-
-#### Service folder structure
-- `docker-compose.yml`
-- `.env` file (if needed)
-- Config file (if needed)
-- Example: [/machines/202-storage/](/machines/202-storage/)
+💡 This setup can be made simpler for private use by placing everything in the same folder.
 
 #### Secrets, Environment Variables, and service files
 
-Docker supports `.env` files to store environnment variables to be used in `docker-compose.yml`. To avoid publicly exposing access tokens and secrets in this repository, they're stored in `storage` folders and accessed using `symlink` files.
-
-💡 This setup can be made simpler for private use by placing everything in the same folder.
+Docker supports `.env` files to store environment variables to be used in `docker-compose.yml`. To avoid publicly exposing access tokens and secrets in this repository, they're stored in `storage` folders and accessed using `symlink` files.
 
 Example: [207.conf](/config/207.conf)
 - The real `.env` file with secrets is under `storage/containers/authentik`
 - The service folder contains a `symlink` pointing to the real `.env` file - under [/machines/207-auth/.env](/machines/207-auth/.env)
-- `ProxmoxVE` config mounts 2 folders - ℹ️ inside one another - under [/config/207.conf](/config/207.conf)
+- `ProxmoxVE` config mounts 2 folders - ℹ️ nested inside each other - under [/config/207.conf](/config/207.conf)
 - `mp0: /root/homelab/machines/207-auth,mp=/root/207`
-  - `monutpoint 0` mounts the service folder [/machines/207-auth/](/machines/207-auth/) to `/root/207` 
+  - `mountpoint 0` mounts the service folder [/machines/207-auth/](/machines/207-auth/) to `/root/207` 
 - `mp1: /mnt/pve/storage/containers/authentik,mp=/root/207/authentik`
-  - `mountpoint 1` mounts the `storage` folder `/storage/containers/authentik` - ℹ️ inside -  `monutpoint 0`: [/machines/207-auth/](/machines/207-auth/)
+  - `mountpoint 1` mounts the `storage` folder `/storage/containers/authentik` - ℹ️ inside -  `mountpoint 0`: [/machines/207-auth/](/machines/207-auth/)
  
 Result: [images/207-auth-folder-structure](images/207-auth-folder-structure.png)
 
-### Utilities
+💡 This setup can be made simpler for private use by placing everything in the same folder.
 
-Provided `symlinks` for easier navigation to relevent folders under the `ProxmoxVE` folder structure:
-- Containers' `.conf` files: [/utils/lxcconf](/utils/lxcconf)
-- Containers' mounts using `pct mount <vmid>` for maintainance: [/utils/lxcmounts](/utils/lxcmounts)
-  - https://pve.proxmox.com/pve-docs/pct.1.html
-
-### Recommended terminal utilities
+#### Recommended terminal utilities
 
 - GUI Git client:
   - https://github.com/jesseduffield/lazygit?tab=readme-ov-file#ubuntu
@@ -173,7 +201,7 @@ Provided `symlinks` for easier navigation to relevent folders under the `Proxmox
 - `201-home`: https://youtu.be/65Lhn90f3YI
 - `203-nginx`: https://youtu.be/sRI4Xhyedw4
 - `202-storage`: https://youtu.be/W2yZ5_sd9Hc
-  - Notes: The config files use `filebrowswer quantum`, a fork of `filebrowser`.
+  - Notes: The config files use `filebrowser quantum`, a fork of `filebrowser`.
 - `204-ddns` - DDNS explained: https://www.youtube.com/watch?v=rOLGvZagdC0
 - `207-auth`: https://www.youtube.com/playlist?list=PLH73rprBo7vSkDq-hAuXOoXx2es-1ExOP
 - `22#-immich`: https://immich.app/docs/overview/quick-start
@@ -182,7 +210,7 @@ Provided `symlinks` for easier navigation to relevent folders under the `Proxmox
 
 <img width="800" src="architecture/diagram.png">
 
-# Hardware
+# Example Setup
 
 #### Main node
 
