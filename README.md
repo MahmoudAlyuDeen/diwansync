@@ -19,7 +19,7 @@ Diwān - دِيوَان is a central official registry with a collection of writ
 ### Demo
 
 **Public**
-- [File sharing demo](https://storage.alyudeen.mywire.org/share/P51zqRA8K_PZxDp-yKDLHw)
+- [File sharing demo](https://storage.alyudeen.mywire.org/share/P51zqRA8K_PZxDp-yKDLHw) (currently down, fix ongoing: https://github.com/gtsteffaniak/filebrowser/issues/429)
 - [Photo sharing demo](https://immich.mahmoud.alyudeen.mywire.org/share/lbG8F_Ag2aipTvQkJQpvoLSe6KIqyTp0sCX8Gey5nhlDSHmHZTwqUhDmWT2qSZP8QfI)
 
 **Private**
