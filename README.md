@@ -33,6 +33,29 @@ If you're looking to move away from relying on big tech companies to manage your
 
 Feel free to ask questions by filing an issue or starting a discussion. Pull requests for improvements are also always appreciated.
 
+### Repository Structure
+
+### [/machines](/machines)
+
+Service service folders are cloned by the `Main Node` machine from this repository and distributed to `lxc` containers using `ProxmoxVE` mountpoints.
+
+Each docker service is deployed on a separate `lxc` container using a dedicated docker compose file.
+
+ℹ️ `201-home`: Only `Home Assistant Operating System` runs on a VM, not a container.
+
+### [/config](/config)
+
+`ProxmoxVE` uses `VMID.conf` files to store VM and container hardware configuration, mountpoints, and network configuration.
+
+Config files are maintained by `ProxmoxVE` - under `/etc/pve/lxc`. They are copied over to this repository.
+
+### [/utils](/utils)
+
+Provided `symlinks` for easier navigation to relevent folders under the `ProxmoxVE` folder structure:
+- Containers' `.conf` files: [/utils/lxcconf](/utils/lxcconf)
+- Containers' mounts using `pct mount <vmid>` for maintainance: [/utils/lxcmounts](/utils/lxcmounts)
+  - https://pve.proxmox.com/pve-docs/pct.1.html
+
 ### New to server management?
 
 Don't worry; we all started somewhere. Try parts of this setup on `Docker Desktop` on any computer before investing in hardware.
@@ -119,29 +142,6 @@ Receive files periodically from `Main Node` for disaster recovery.
 - Installer runs automatically on windows boot: https://github.com/Bill-Stewart/SyncthingWindowsSetup
 - Link: https://sync.backup.alyudeen.mywire.org/
 
-# Repository Structure
-
-### [/machines](/machines)
-
-Service service folders are cloned by the `Main Node` machine from this repository and distributed to `lxc` containers using `ProxmoxVE` mountpoints.
-
-Each docker service is deployed on a separate `lxc` container using a dedicated docker compose file.
-
-ℹ️ `201-home`: Only `Home Assistant Operating System` runs on a VM, not a container.
-
-### [/config](/config)
-
-`ProxmoxVE` uses `VMID.conf` files to store VM and container hardware configuration, mountpoints, and network configuration.
-
-Config files are maintained by `ProxmoxVE` - under `/etc/pve/lxc`. They are copied over to this repository.
-
-### [/utils](/utils)
-
-Provided `symlinks` for easier navigation to relevent folders under the `ProxmoxVE` folder structure:
-- Containers' `.conf` files: [/utils/lxcconf](/utils/lxcconf)
-- Containers' mounts using `pct mount <vmid>` for maintainance: [/utils/lxcmounts](/utils/lxcmounts)
-  - https://pve.proxmox.com/pve-docs/pct.1.html
-
 # Notes
 
 #### Proxmox Setup
@@ -150,7 +150,7 @@ Provided `symlinks` for easier navigation to relevent folders under the `Proxmox
 
 https://www.proxmox.com/en/
 
-`ProxmoxVE` is installed on the main machine with 3 storage paths.
+`ProxmoxVE` is installed on the `Main Node` with 3 storage paths.
 
 - `local`
   - The boot storage on which `ProxmoxVE` is installed.
