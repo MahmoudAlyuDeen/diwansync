@@ -53,7 +53,7 @@ Config files are maintained by `ProxmoxVE` - under `/etc/pve/lxc`. They are copi
 
 Provided `symlinks` for easier navigation to relevent folders under the `ProxmoxVE` folder structure:
 - Containers' `.conf` files: [/utils/lxcconf](/utils/lxcconf)
-- Containers' mounts using `pct mount <vmid>` for maintainance: [/utils/lxcmounts](/utils/lxcmounts)
+- Containers' mounts using `pct mount <vmid>` for maintenance: [/utils/lxcmounts](/utils/lxcmounts)
   - https://pve.proxmox.com/pve-docs/pct.1.html
 
 ### New to server management?
