@@ -55,50 +55,69 @@ My example setup is split between 1 active "Main Node" that runs all the service
 
 ### Main Node
 
-- `201-home`
-  - Purpose: Control lights and smart devices from web and mobile apps.
-  - Project: https://www.home-assistant.io
-  - Link: https://home.alyudeen.mywire.org/
-- `202-storage`
-  - Purpose: Access and share files from a web browser
-  - Project: https://github.com/gtsteffaniak/filebrowser
-  - Link: https://storage.alyudeen.mywire.org/
-- `203-nginx`
-  - Purpose: Access services using pretty https URLs, with SSL certificate creation and management.
-  - Project: https://github.com/NginxProxyManager/nginx-proxy-manager
-  - Link: https://nginx.alyudeen.mywire.org/
-- `204-ddns`
-  - Purpose: Make the server remotely accessible by updating DDNS providers with realtime IP address.
-  - Project: https://github.com/qdm12/ddns-updater
-  - Link: https://ddns.alyudeen.mywire.org/
-- `205-sync`
-  - Purpose: Send files periodically to backup node for disaster recovery.
-  - Project: https://github.com/syncthing/syncthing
-  - Link: https://sync.storage.alyudeen.mywire.org/
-- `206-homebackus`
-  - Purpose: Enable home assistant backups over the network in files for disaster recovery.
-  - Project: https://github.com/dperson/samba
-  - Notes: A "full" backup automatically restores all configuration, automations, scenes, and device connections.
-- `207-auth`
-  - Purpose: Require 2 factor authentication to access services and enable passwordless login.
-  - Project: https://github.com/goauthentik/authentik
-  - Link: https://auth.alyudeen.mywire.org/
-- `209-logs`
-  - Purpose: Display access logs by country, ip, destination service, and other parameters.
-  - Project: https://github.com/xavier-hernandez/goaccess-for-nginxproxymanager
-  - Link: https://logs.alyudeen.mywire.org/
-- `22#-immich`
-  - Purpose: Automatic photo backup from phones, with web and client apps, and sharing and albums.
-  - Project: https://github.com/immich-app/immich
-  - Link: https://immich.mahmoud.alyudeen.mywire.org/
+#### `201-home`
+
+`Home Assistant OS` `VM` - control lights and smart devices from web and mobile apps.
+- Project: https://www.home-assistant.io
+- Link: https://home.alyudeen.mywire.org/
+
+#### `202-storage`
+
+`FileBrowser Quantum` - Access and share files from a web browser.
+- Project: https://github.com/gtsteffaniak/filebrowser
+- Link: https://storage.alyudeen.mywire.org/
+
+#### `203-nginx`
+
+`NginxProxyManager` deployment - To access services using pretty https URLs, with SSL certificate creation and management.
+- Project: https://github.com/NginxProxyManager/nginx-proxy-manager
+- Link: https://nginx.alyudeen.mywire.org/
+
+#### `204-ddns`
+
+Make the server remotely accessible by updating `DDNS` providers with realtime IP address.
+- Project: https://github.com/qdm12/ddns-updater
+- Link: https://ddns.alyudeen.mywire.org/
+
+#### `205-sync`
+
+`Syncthing` instance - Sends files periodically to backup node for disaster recovery.
+- Project: https://github.com/syncthing/syncthing
+- Link: https://sync.storage.alyudeen.mywire.org/
+
+#### `206-homebackups`
+
+Simple `samba` share - Enables home assistant backups over the network in files for disaster recovery.
+- Project: https://github.com/dperson/samba
+- Notes: A "full" backup automatically restores all configuration, automations, scenes, and device connections.
+
+#### `207-auth`
+
+`Authentik` deployment - Require 2 factor authentication to access services and enable passwordless login.
+- Project: https://github.com/goauthentik/authentik
+- Link: https://auth.alyudeen.mywire.org/
+
+#### `209-logs`
+
+`GoAccess` instance displaying data from `203-nginx` - Displays access logs by country, ip, destination service, and other parameters.
+- Project: https://github.com/xavier-hernandez/goaccess-for-nginxproxymanager
+- Link: https://logs.alyudeen.mywire.org/
+
+#### `22#-immich`
+
+`Immich` instance for each user - Automatic photo backup from phones, with web and client apps, and sharing and albums.
+- Project: https://github.com/immich-app/immich
+- Link: https://immich.mahmoud.alyudeen.mywire.org/
 
 ### Backup Node
 
-- **Operating system**: Windows.
-- **Hosted service**: Syncthing.
-  - Purpose: Receive files periodically from `Main Node` for disaster recovery.
-  - Installer runs automatically on windows boot: https://github.com/Bill-Stewart/SyncthingWindowsSetup
-  - Link: https://sync.backup.alyudeen.mywire.org/
+#### Operating system: Windows.
+
+#### Hosted service: Syncthing.
+
+Receive files periodically from `Main Node` for disaster recovery.
+- Installer runs automatically on windows boot: https://github.com/Bill-Stewart/SyncthingWindowsSetup
+- Link: https://sync.backup.alyudeen.mywire.org/
 
 # Repository Structure
 
