@@ -204,6 +204,18 @@ Result: [images/207-auth-folder-structure](images/207-auth-folder-structure.png)
 
 💡 This setup can be made simpler for private use by placing everything in the same folder.
 
+#### Network config
+
+To keep things simple, I configure services to have matching ID and internal ip; Starting with `200` for the Proxmox GUI itself. The port for web UI is also always the same: `8000`.
+
+Example: `201-home` -> `192.168.1.201:8000`
+
+In the case of `22#-immich`, I run multiple users each with their own container ID and ip, this is configured with the range of `22#`: `221`, `222`, `223`...
+
+Result: [images/network-configuration](images/network-configuration.png)
+
+💡 This setup is listed for example, and to explain values in config files in this repository. This can be customized for personal preferences and needs.
+
 #### Recommended terminal utilities
 
 - GUI Git client:
