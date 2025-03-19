@@ -204,13 +204,17 @@ Result: [images/207-auth-folder-structure](images/207-auth-folder-structure.png)
 
 💡 This setup can be made simpler for private use by placing everything in the same folder.
 
-#### Network config
+#### Network configuration
 
-To keep things simple, I configure services to have matching ID and internal ip; Starting with `200` for the Proxmox GUI itself. The port for web UI is also always the same: `8000`.
+Services are configured to have matching container ID and internal ip for simplicity and consistentcy.
 
-Example: `201-home` -> `192.168.1.201:8000`
-
-In the case of `22#-immich`, I run multiple users each with their own container ID and ip, this is configured with the range of `22#`: `221`, `222`, `223`...
+- Starting with `200` for the `ProxmoxVE` web interface.
+- The port for any web UI is configured to be `8000` for most services.
+  - Example: `201-home` -> `192.168.1.201:8000`
+- In the case of `22#-immich`, to enable multi-tenancy, each with a separate container, it's is configured with the range of `22#`: `221`, `222`, `223`...
+- Reverse proxy is done by the `203-nginx` service. The configuration is not included here.
+  - This is due to the way `NginxProxyManager` manages configuration via a web UI and not config files.
+  - Currently exploring other reverse-proxy solutions that are config file based.
 
 Result: [images/network-configuration](images/network-configuration.png)
 
