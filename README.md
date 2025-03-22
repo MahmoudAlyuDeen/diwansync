@@ -183,7 +183,7 @@ Example: [202.conf](/config/202.conf)
   - `backup` mount: `mp1: /mnt/pve/backup,mp=/mnt/backup`
   - Service config mount: `mp2: /root/homelab/machines/202-storage,mp=/root/202`
 
-Result: [images/202-files-folder-structure](images/202-files-folder-structure.png)
+Result: [images/202-storage-folder-structure](images/202-storage-folder-structure.png)
 
 💡 This setup can be made simpler for private use by placing everything in the same folder.
 
