@@ -1,3 +1,5 @@
+rm -R immich/merged-config.yml/
+
 set -a # export all variables
 source .env
 set +a # undo the set -a
