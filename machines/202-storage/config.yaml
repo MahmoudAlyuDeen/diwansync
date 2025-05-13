@@ -4,11 +4,10 @@ server:
     - path: "/mnt/storage"
     - path: "/mnt/backup"
 auth:
-  signup: false
   methods:
     noauth: true
 frontend:
-  name: "AlyuDeen Storage"
+  name: "DiwanStorage"
 userDefaults:
   darkMode: false
   viewMode: "list"
