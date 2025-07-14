@@ -7,6 +7,3 @@ set +a # undo the set -a
 envsubst < "config.yml" > "immich/merged-config.yml"
 
 docker compose up -d --force-recreate
-
-rm ./immich/merged-config.yml
-
