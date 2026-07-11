@@ -5,7 +5,7 @@ services:
     hostname: sync.storage
     volumes:
       - /mnt/storage:/storage
-      - ./syncthing:/var/syncthing
+      - ../../storage/volumes/001-syncthing:/var/syncthing
     environment:
       - PUID=0
       - PGID=0

@@ -7,7 +7,7 @@ services:
     ports:
       - 8000:8000/tcp
     volumes:
-      - ./ddnsupdater/data:/updater/data
+      - ../../storage/volumes/006-ddns/data:/updater/data
     environment:
       -  PERIOD=5m
       -  IP_METHOD=cycle

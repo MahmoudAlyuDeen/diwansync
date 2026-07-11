@@ -3,7 +3,7 @@ services:
     user: 0:0
     volumes:
       - /mnt:/mnt:rw
-      - ./config.yaml:/home/filebrowser/config.yaml
+      - ../../storage/volumes/002-filebrowser/config.yaml:/home/filebrowser/config.yaml
     ports:
       - '8000:80'
     image: gtstef/filebrowser
