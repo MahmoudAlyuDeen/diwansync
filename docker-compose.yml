@@ -1,0 +1,9 @@
+name: diwansync
+
+include:
+  - services/001-syncthing/docker-compose.yml
+  - services/002-filebrowser/docker-compose.yml
+  - services/003-nginx/docker-compose.yml
+  - services/004-authentik/docker-compose.yml
+  - services/005-immich/docker-compose.yml
+  - services/006-ddns/docker-compose.yml
