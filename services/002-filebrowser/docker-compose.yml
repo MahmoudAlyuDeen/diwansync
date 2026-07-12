@@ -6,6 +6,6 @@ services:
       - ../../backup:/backup:rw
       - ./config.yaml:/home/filebrowser/config.yaml
     ports:
-      - '8000:80'
+      - '8002:80'
     image: gtstef/filebrowser
     restart: unless-stopped

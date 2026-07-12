@@ -5,7 +5,7 @@ services:
     user: 0:0
     network_mode: bridge
     ports:
-      - 8000:8000/tcp
+      - 8006:8000/tcp
     volumes:
       - ../../storage/volumes/006-ddns/data:/updater/data
     environment:
@@ -14,6 +14,6 @@ services:
       -  IPV4_METHOD=cycle
       -  IPV6_METHOD=cycle
       -  HTTP_TIMEOUT=10s
-      -  LISTENING_PORT=8000
+      -  LISTENING_PORT=8006
       -  ROOT_URL=/
     restart: always

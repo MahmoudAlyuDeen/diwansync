@@ -46,7 +46,7 @@ services:
     env_file:
       - .env
     ports:
-      - 8000:9000
+      - 8004:9000
       - 9443:9443
     depends_on:
       - postgresql
