@@ -37,6 +37,16 @@ else
     echo "  - 005-immich secrets already exist, skipping"
 fi
 
+# Seed the Immich instance config from the local template (no compile needed for local-only).
+# The template ships with oauth disabled by default; run
+# services/005-immich/compile-remote-access.sh to overwrite it with remote SSO values.
+if [ ! -f /storage/volumes/005-immich/instance-config.yml ]; then
+    echo "Seeding 005-immich instance config..."
+    sudo cp services/005-immich/config.yml /storage/volumes/005-immich/instance-config.yml
+else
+    echo "  - 005-immich instance config already exists, skipping"
+fi
+
 echo ""
 echo "=== Init complete ==="
 echo "Edit /storage/env/*.env files with your settings, then run: docker compose up -d"
