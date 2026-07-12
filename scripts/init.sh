@@ -37,6 +37,20 @@ else
     echo "  - 005-immich secrets already exist, skipping"
 fi
 
+# Seed Immich instance config from the local template for local access.
+# The template ships with oauth disabled by default.
+# To enable remote access:
+# - Obtain OAuth parameters from Authentik or another provider.
+# - In storage/env/005-immich.env, uncomment and set the CONFIG_OAUTH_* values.
+# - From services/005-immich/, run ./compile-remote-access.sh.
+# - Run docker compose up -d.
+if [ ! -f /storage/volumes/005-immich/instance-config.yml ]; then
+    echo "Seeding 005-immich instance config..."
+    sudo cp services/005-immich/config.yml /storage/volumes/005-immich/instance-config.yml
+else
+    echo "  - 005-immich instance config already exists, skipping"
+fi
+
 echo ""
 echo "=== Init complete ==="
 echo "Edit /storage/env/*.env files with your settings, then run: docker compose up -d"
