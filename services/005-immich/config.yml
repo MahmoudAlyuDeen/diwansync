@@ -119,7 +119,7 @@ oauth:
   clientId: ${CONFIG_OAUTH_CLIENT_ID}
   clientSecret: ${CONFIG_OAUTH_CLIENT_SECRET}
   defaultStorageQuota: 0
-  enabled: true
+  enabled: ${CONFIG_OAUTH_ENABLED:-false}
   issuerUrl: ${CONFIG_OAUTH_ISSUER_URL}
   mobileOverrideEnabled: false
   mobileRedirectUri: ''
@@ -133,7 +133,7 @@ passwordLogin:
 reverseGeocoding:
   enabled: true
 server:
-  externalDomain: ${CONFIG_EXTERNAL_DOMAIN}
+  externalDomain: '${CONFIG_EXTERNAL_DOMAIN}'
   loginPageMessage: Enter login information
   publicUsers: true
 storageTemplate:
