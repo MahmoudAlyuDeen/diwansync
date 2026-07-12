@@ -4,7 +4,7 @@ services:
     container_name: syncthing
     hostname: sync.storage
     volumes:
-      - /mnt/storage:/storage
+      - ../../storage:/storage
       - ../../storage/volumes/001-syncthing:/var/syncthing
     environment:
       - PUID=0
