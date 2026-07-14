@@ -1,5 +1,5 @@
 services:
-  syncthing:
+  003-syncthing:
     image: syncthing/syncthing
     container_name: syncthing
     hostname: sync.storage

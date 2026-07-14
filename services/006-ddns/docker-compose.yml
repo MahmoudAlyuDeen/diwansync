@@ -1,5 +1,5 @@
 services:
-  ddns-updater:
+  006-ddns:
     image: qmcgaw/ddns-updater
     container_name: ddns-updater
     user: 0:0
