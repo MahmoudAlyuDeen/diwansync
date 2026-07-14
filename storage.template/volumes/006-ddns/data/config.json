@@ -1,9 +1,10 @@
 {
-    "settings": [
-        {
-            "provider": "REPLACE_ME",
-            "domain": "REPLACE_ME",
-            "password": "REPLACE_ME"
-        }
-    ]
+  "settings": [
+    {
+      "provider": "example",
+      "domain": "example.com",
+      "host": "@",
+      "password": "REPLACE_ME"
+    }
+  ]
 }
