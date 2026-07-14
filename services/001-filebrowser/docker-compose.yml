@@ -7,6 +7,6 @@ services:
       - ../../storage/volumes/001-filebrowser/database.db:/home/filebrowser/database.db
       - ./config.yaml:/home/filebrowser/config.yaml
     ports:
-      - '8002:80'
+      - '8001:80'
     image: gtstef/filebrowser
     restart: unless-stopped

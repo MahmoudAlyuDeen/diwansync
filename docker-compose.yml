@@ -1,13 +1,12 @@
 name: diwansync
 
 include:
-  - services/001-syncthing/docker-compose.yml
-  - services/002-filebrowser/docker-compose.yml
+  - services/001-filebrowser/docker-compose.yml
+  - services/002-immich/docker-compose.yml
+  - services/003-syncthing/docker-compose.yml
 
   # Remote access services — optional, omit for fully local setup
-  - services/003-nginx/docker-compose.yml
-  - services/004-authentik/docker-compose.yml
+  - services/004-nginx/docker-compose.yml
+  - services/005-authentik/docker-compose.yml
   - services/006-ddns/docker-compose.yml
   # /Remote access services
-
-  - services/005-immich/docker-compose.yml

@@ -5,12 +5,12 @@ services:
     hostname: sync.storage
     volumes:
       - ../../storage:/storage
-      - ../../storage/volumes/001-syncthing:/var/syncthing
+      - ../../storage/volumes/003-syncthing:/var/syncthing
     environment:
       - PUID=0
       - PGID=0
     ports:
-      - 8001:8384 # Web UI
+      - 8003:8384 # Web UI
       - 22000:22000/tcp # TCP file transfers
       - 22000:22000/udp # QUIC file transfers
       - 21027:21027/udp # Receive local discovery broadcasts

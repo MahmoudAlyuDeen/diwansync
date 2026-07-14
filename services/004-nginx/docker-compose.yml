@@ -5,8 +5,8 @@
     restart: unless-stopped
     ports:
       - '80:80'
-      - '8003:81'
+      - '8004:81'
       - '443:443'
     volumes:
-      - ../../storage/volumes/003-nginx/data:/data
-      - ../../storage/volumes/003-nginx/letsencrypt:/etc/letsencrypt
+      - ../../storage/volumes/004-nginx/data:/data
+      - ../../storage/volumes/004-nginx/letsencrypt:/etc/letsencrypt

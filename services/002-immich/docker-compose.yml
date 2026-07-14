@@ -17,16 +17,16 @@ services:
     #   service: cpu # set to one of [nvenc, quicksync, rkmpp, vaapi, vaapi-wsl] for accelerated transcoding
     volumes:
       # Do not edit the next line. If you want to change the media storage location on your system, edit the value of UPLOAD_LOCATION in the .env file
-      - ../../storage/volumes/005-immich/upload:/usr/src/app/upload
+      - ../../storage/volumes/002-immich/upload:/usr/src/app/upload
       - ../../storage/media/002-immich:/usr/src/app/upload/library
-      - ../../storage/volumes/005-immich/instance-config.yml:/config/config.yml
+      - ../../storage/volumes/002-immich/instance-config.yml:/config/config.yml
       - /etc/localtime:/etc/localtime:ro
     env_file:
       - .env
     environment:
       IMMICH_CONFIG_FILE: /config/config.yml
     ports:
-      - 8005:2283
+      - 8002:2283
     depends_on:
       - redis
       - database
@@ -67,7 +67,7 @@ services:
       POSTGRES_INITDB_ARGS: '--data-checksums'
     volumes:
       # Do not edit the next line. If you want to change the database storage location on your system, edit the value of DB_DATA_LOCATION in the .env file
-      - ../../storage/volumes/005-immich/data:/var/lib/postgresql/data
+      - ../../storage/volumes/002-immich/data:/var/lib/postgresql/data
     restart: always
 
 volumes:

@@ -26,7 +26,7 @@ Or manually:
 2. Copy the contents of `storage.template/` into it.
 3. Generate a password for the Immich database:
    ```
-   echo "DB_PASSWORD=$(openssl rand -base64 36)" >> /storage/env/005-immich.env
+   echo "DB_PASSWORD=$(openssl rand -base64 36)" >> /storage/env/002-immich.env
    ```
 4. Run `docker compose up -d`.
 
@@ -67,10 +67,10 @@ All persistent files live under one root, making backups trivial; back up the st
 
 Volume mounts use `../../storage/...` relative paths from the service directory. These are bind mounts; they map a host directory directly into the container, persisting whatever the service writes there. For example:
 
-- `001-syncthing`: `../../storage:/storage` (full storage tree for backup)
-- `005-immich`: `../../storage/media/002-immich:/usr/src/app/upload/library` (user photos)
-- `005-immich`: `../../storage/volumes/005-immich/data:/var/lib/postgresql/data` (database files)
-- `005-immich`: `../../storage/volumes/005-immich/instance-config.yml:/config/config.yml` (runtime config)
+- `003-syncthing`: `../../storage:/storage` (full storage tree for backup)
+- `002-immich`: `../../storage/media/002-immich:/usr/src/app/upload/library` (user photos)
+- `002-immich`: `../../storage/volumes/002-immich/data:/var/lib/postgresql/data` (database files)
+- `002-immich`: `../../storage/volumes/002-immich/instance-config.yml:/config/config.yml` (runtime config)
 
 Volume breakdown by type:
 - `volumes/NNN-name/data` (databases and service state, replaceable, can be rebuilt)
@@ -87,14 +87,14 @@ This setup uses nothing but Docker Compose with standard `include:` directives. 
 
 Services are organized by numeric prefix:
 
-- `001-syncthing`
-- `002-filebrowser`
-- `003-nginx`
-- `004-authentik`
-- `005-immich`
+- `001-filebrowser`
+- `002-immich`
+- `003-syncthing`
+- `004-nginx`
+- `005-authentik`
 - `006-ddns`
 
-The numbering is a cross-cutting identifier used consistently across directory names (`services/005-immich/`), port mappings (`8005:2283`), container names (`immich_server`), env file names (`storage.template/env/005-immich.env`), and volume paths (`storage/volumes/005-immich/`).
+The numbering is a cross-cutting identifier used consistently across directory names (`services/002-immich/`), port mappings (`8002:2283`), container names (`immich_server`), env file names (`storage.template/env/002-immich.env`), and volume paths (`storage/volumes/002-immich/`).
 
 ## 5. Secrets & External Configuration
 
@@ -108,13 +108,13 @@ The `init.sh` convenience script auto-generates strong random secrets (`openssl 
 
 Immich requires a YAML config file for runtime settings (OAuth, machine learning, storage templates, etc.). This pipeline provides a working local setup out of the box with optional remote access as an explicit opt-in step.
 
-**Stage 1: Template (`services/005-immich/config.yml`).**
+**Stage 1: Template (`services/002-immich/config.yml`).**
 Ships with OAuth disabled by default (`enabled: ${CONFIG_OAUTH_ENABLED:-false}`). Works immediately for local access.
 
 **Stage 2: Seed (`init.sh`).**
-On first run, copies `config.yml` to `/storage/volumes/005-immich/instance-config.yml`. Gives a working local setup with zero configuration. Idempotent: checks for existing file before copying.
+On first run, copies `config.yml` to `/storage/volumes/002-immich/instance-config.yml`. Gives a working local setup with zero configuration. Idempotent: checks for existing file before copying.
 
-**Stage 3: Compile (`services/005-immich/compile-remote-access.sh`).**
+**Stage 3: Compile (`services/002-immich/compile-remote-access.sh`).**
 Fills in OAuth env vars and runs `envsubst` to replace template variables. Overwrites the seeded config with the compiled remote-access version. Single command, no manual YAML editing.
 
 Local access works immediately with no configuration. Remote access requires explicit opt-in (security by default). The config is mounted as a volume, not baked into the image; changes apply on restart.
