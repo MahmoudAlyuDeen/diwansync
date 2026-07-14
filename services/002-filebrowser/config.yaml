@@ -1,13 +1,20 @@
 server:
   port: 80
+  database: "/home/filebrowser/database.db"
   sources:
     - path: "/storage"
-    - path: "/backup"
+    - path: "/files"
 auth:
   methods:
     noauth: true
 frontend:
-  name: "DiwanStorage"
+  name: "DiwanSync"
+  styling:
+    customCSS: "reduce-rounded-corners.css"
 userDefaults:
   darkMode: false
   viewMode: "list"
+  showHidden: true
+  quickDownload: true
+  stickySidebar: true
+  editorQuickSave: true
