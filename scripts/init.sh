@@ -11,8 +11,10 @@ else
     echo "./storage already exists, skipping creation."
 fi
 
-echo "Copying storage.template to ./storage..."
-cp -r ./storage.template/* ./storage/
+echo "Seeding storage.template into ./storage (existing files preserved)..."
+# Seed only missing files; never overwrite existing secrets/config.
+# cp -Rn exits non-zero when it skips existing files, which is expected here.
+cp -Rn ./storage.template/* ./storage/ || true
 
 echo ""
 echo "Generating secrets..."
