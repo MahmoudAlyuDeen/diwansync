@@ -9,285 +9,112 @@ Diwān - دِيوَان is a central official registry with a collection of writ
 # At a Glance
 
 - A free blueprint for a private personal server hosting photos and files.
-
 - Automatic photo backup and sharing capabilities.
-
 - Runs on cheap refurbished hardware and scales to enterprise systems if required.
-
 - Securely accessible everywhere. Open source. 100% free.
 
-### Demo
+---
 
-**Public**
-- [File sharing demo](https://storage.alyudeen.mywire.org/share/P51zqRA8K_PZxDp-yKDLHw) (currently down, fix ongoing: https://github.com/gtsteffaniak/filebrowser/issues/429)
-- [Photo sharing demo](https://immich.mahmoud.alyudeen.mywire.org/share/lbG8F_Ag2aipTvQkJQpvoLSe6KIqyTp0sCX8Gey5nhlDSHmHZTwqUhDmWT2qSZP8QfI)
+# Getting Started
 
-**Private**
-- See yourself get locked out trying to access https://storage.alyudeen.mywire.org/
+**First time:**
+1. Run `scripts/init.sh`. It creates the storage directory, copies templates, and generates secrets.
+2. Run `docker compose up -d`.
 
-# This Repository
+Or manually:
+1. Create a storage directory and point the `storage` symlink to it (defaults to `/storage`).
+2. Copy the contents of `storage.template/` into it.
+3. Generate a password for the Immich database:
+   ```
+   echo "DB_PASSWORD=$(openssl rand -base64 36)" >> /storage/env/005-immich.env
+   ```
+4. Run `docker compose up -d`.
 
-This repository aims to document iterative changes for myself, and to be a guide to replicate the full setup or parts of it as easily as possible.
+**Redeployment or restore from backup.** Point the `storage` symlink at your existing data directory and start the services. All configs, secrets, media, and databases are already in place.
 
-If you're looking to move away from relying on big tech companies to manage your files and photos, you're welcome to reach out. I'm happy to help!
+---
 
-Feel free to ask questions by filing an issue or starting a discussion. Pull requests for improvements are also always appreciated.
+# Architecture Overview
 
-### Repository Structure
+## 1. Media Organization
 
-### [/machines](/machines)
+Core user data, files and photos, lives in a dedicated `media/` directory under the storage root, completely independent of the services that manage them.
 
-Service service folders are cloned by the `Main Node` machine from this repository and distributed to `lxc` containers using `ProxmoxVE` mountpoints.
+```
+storage/media/
+  001-filebrowser/   files
+  002-immich/        photos
+```
 
-Each docker service is deployed on a separate `lxc` container using a dedicated docker compose file.
+Files are stored with flat, human-readable date-time naming: `2026-07-12_19-23-02_photo.jpg`. No subfolders, no album structures, no year/month organization on disk. The files themselves carry their own metadata and GPS coordinates. Only Immich's search indexes, facial recognition data, and album structures live in the database and are fully disposable. The database can be wiped with zero effect on the user's actual files. Data can be taken completely offline, moved to another service, browsed in any file manager, or migrated to a different photo platform.
 
-ℹ️ `201-home`: Only `Home Assistant Operating System` runs on a VM, not a container.
+Services are conveniences, not dependencies. You can stop using Immich and your photos are still right there in a folder, organized by date. You can stop using Filebrowser and your files are still right there.
 
-### [/config](/config)
+Remote access services (nginx, authentik, ddns) are optional. The setup runs fully locally without them by omitting those services from the compose file.
 
-`ProxmoxVE` uses `VMID.conf` files to store VM and container hardware configuration, mountpoints, and network configuration.
+## 2. Storage Architecture
 
-Config files are maintained by `ProxmoxVE` - under `/etc/pve/lxc`. They are copied over to this repository.
+The repo contains only code and templates. All runtime data (secrets, uploads, databases, configs) lives outside the repo under a configurable storage path, defaulting to `/storage/`.
 
-### [/utils](/utils)
+A `storage` symlink at the repo root points to the persistent data directory. This makes all Docker volume mounts resolvable relative to the repo regardless of where the actual data lives: a NAS mount, a second disk, a different machine, or just a regular folder. The symlink is the single point of configuration.
 
-Provided `symlinks` for easier navigation to relevent folders under the `ProxmoxVE` folder structure:
-- Containers' `.conf` files: [/utils/lxcconf](/utils/lxcconf)
-- Containers' mounts using `pct mount <vmid>` for maintenance: [/utils/lxcmounts](/utils/lxcmounts)
-  - https://pve.proxmox.com/pve-docs/pct.1.html
+All persistent files live under one root, making backups trivial; back up the storage path and everything is captured. Each service's non-media data gets its own subdirectory under `volumes/` with no cross-contamination. The `storage.template/volumes/` mirrors this structure with `.gitkeep` files to preserve empty directories.
 
-### New to server management?
+**Why this matters:**
+- The repo stays clean: no `.gitignore` gymnastics for secrets, no accidental commits of disposable or user data.
+- Persistent Docker data, media files, and user secrets are fully isolated, contained, and grouped under one root.
+- The storage path is completely portable. Change the symlink target and everything follows.
 
-Don't worry; we all started somewhere. Try parts of this setup on `Docker Desktop` on any computer before investing in hardware.
+Volume mounts use `../../storage/...` relative paths from the service directory. These are bind mounts; they map a host directory directly into the container, persisting whatever the service writes there. For example:
 
-### Steps:
+- `001-syncthing`: `../../storage:/storage` (full storage tree for backup)
+- `005-immich`: `../../storage/media/002-immich:/usr/src/app/upload/library` (user photos)
+- `005-immich`: `../../storage/volumes/005-immich/data:/var/lib/postgresql/data` (database files)
+- `005-immich`: `../../storage/volumes/005-immich/instance-config.yml:/config/config.yml` (runtime config)
 
-1. **Install Docker Desktop**: https://www.docker.com/products/docker-desktop
-2. **Clone this Repository**:  
-   Download the DiwanSync repository to your local machine.
-3. **Try Docker Compose**:  
-   Use the provided `docker-compose` configurations to run the services in containers.
-4. **Access the Services**:  
-   Follow the guides and instructions below to access services locally.
+Volume breakdown by type:
+- `volumes/NNN-name/data` (databases and service state, replaceable, can be rebuilt)
+- `volumes/NNN-name/upload` (generated content: thumbs, profile, encoded video)
+- `volumes/NNN-name/*.yml` (runtime configuration files)
+- `volumes/NNN-name/certs` (SSL certificates and keys)
+- `media/` (canonical home for user files and photos, portable, service-independent)
 
-# Services
+## 3. Platform & Portability
 
-Each service provides a key function of the system; Services can be picked and customized to fit personal needs, with space for addition. Each service has its own active community that provides support for specific needs.
+This setup uses nothing but Docker Compose with standard `include:` directives. It deploys on any system that runs Docker, Mac, Linux, Windows, a potato.
 
-My example setup is split between 1 active "Main Node" that runs all the services, and one passive "Backup Node" to provide a backup for redundancy and disaster recovery. I plan to add a "Remote Node" later to add geographical destribution.
+## 4. Service Layout
 
-### Main Node
+Services are organized by numeric prefix:
 
-#### `201-home`
+- `001-syncthing`
+- `002-filebrowser`
+- `003-nginx`
+- `004-authentik`
+- `005-immich`
+- `006-ddns`
 
-`Home Assistant OS` `VM` - control lights and smart devices from web and mobile apps.
-- Project: https://www.home-assistant.io
-- Link: https://home.alyudeen.mywire.org/
+The numbering is a cross-cutting identifier used consistently across directory names (`services/005-immich/`), port mappings (`8005:2283`), container names (`immich_server`), env file names (`storage.template/env/005-immich.env`), and volume paths (`storage/volumes/005-immich/`).
 
-#### `202-storage`
+## 5. Secrets & External Configuration
 
-`FileBrowser Quantum` - Access and share files from a web browser.
-- Project: https://github.com/gtsteffaniak/filebrowser
-- Link: https://storage.alyudeen.mywire.org/
+Some services require secrets or config files that cannot be tracked in a public repository: database passwords, API keys, OAuth client credentials, and service-specific configuration like DDNS provider settings. These live in the persistent storage path under `storage/env/NNN-name.env` and `storage/volumes/NNN-name/`, mounted directly into the container. The service directory contains a `.env` symlink pointing to the corresponding file in `storage/env/`.
 
-#### `203-nginx`
+Secrets never enter the repository, so there is no risk of accidental exposure. All sensitive configuration is grouped under one root for backup and audit. The template files (`storage.template/env/`) contain placeholder values and documentation, serving as a reference for what each service expects.
 
-`NginxProxyManager` deployment - To access services using pretty https URLs, with SSL certificate creation and management.
-- Project: https://github.com/NginxProxyManager/nginx-proxy-manager
-- Link: https://nginx.alyudeen.mywire.org/
+The `init.sh` convenience script auto-generates strong random secrets (`openssl rand -base64 36`) for services that need them (authentik, immich) and writes them into the storage path. Re-running init.sh is safe; it checks for existing values before overwriting.
 
-#### `204-ddns`
+## 6. Immich Config Pipeline (Template, Seed, Compile)
 
-Make the server remotely accessible by updating `DDNS` providers with realtime IP address.
-- Project: https://github.com/qdm12/ddns-updater
-- Link: https://ddns.alyudeen.mywire.org/
+Immich requires a YAML config file for runtime settings (OAuth, machine learning, storage templates, etc.). This pipeline provides a working local setup out of the box with optional remote access as an explicit opt-in step.
 
-#### `205-sync`
+**Stage 1: Template (`services/005-immich/config.yml`).**
+Ships with OAuth disabled by default (`enabled: ${CONFIG_OAUTH_ENABLED:-false}`). Works immediately for local access.
 
-`Syncthing` instance - Sends files periodically to backup node for disaster recovery.
-- Project: https://github.com/syncthing/syncthing
-- Link: https://sync.storage.alyudeen.mywire.org/
+**Stage 2: Seed (`init.sh`).**
+On first run, copies `config.yml` to `/storage/volumes/005-immich/instance-config.yml`. Gives a working local setup with zero configuration. Idempotent: checks for existing file before copying.
 
-#### `206-homebackups`
+**Stage 3: Compile (`services/005-immich/compile-remote-access.sh`).**
+Fills in OAuth env vars and runs `envsubst` to replace template variables. Overwrites the seeded config with the compiled remote-access version. Single command, no manual YAML editing.
 
-Simple `samba` share - Enables home assistant backups over the network in files for disaster recovery.
-- Project: https://github.com/dperson/samba
-- Notes: A "full" backup automatically restores all configuration, automations, scenes, and device connections.
-
-#### `207-auth`
-
-`Authentik` deployment - Require 2 factor authentication to access services and enable passwordless login.
-- Project: https://github.com/goauthentik/authentik
-- Link: https://auth.alyudeen.mywire.org/
-
-#### `209-logs`
-
-`GoAccess` instance displaying data from `203-nginx` - Displays access logs by country, ip, destination service, and other parameters.
-- Project: https://github.com/xavier-hernandez/goaccess-for-nginxproxymanager
-- Link: https://logs.alyudeen.mywire.org/
-
-#### `22#-immich`
-
-`Immich` instance for each user - Automatic photo backup from phones, with web and client apps, and sharing and albums.
-- Project: https://github.com/immich-app/immich
-- Link: https://immich.mahmoud.alyudeen.mywire.org/
-
-### Backup Node
-
-#### Operating system: Windows.
-
-#### Hosted service: Syncthing.
-
-Receive files periodically from `Main Node` for disaster recovery.
-- Installer runs automatically on windows boot: https://github.com/Bill-Stewart/SyncthingWindowsSetup
-- Link: https://sync.backup.alyudeen.mywire.org/
-
-# Notes
-
-#### Proxmox Setup
-
-`ProxmoxVE` runs services in isolation in separate virtual machines or lightweight linux containers with a GUI and easy backup / restore.
-
-https://www.proxmox.com/en/
-
-`ProxmoxVE` is installed on the `Main Node` with 3 storage paths.
-
-- `local`
-  - The boot storage on which `ProxmoxVE` is installed.
-  - Used to store all running VMs and containers.
-- `storage`
-  - A logically (or also physically) separate storage from `local` boot storage.
-  - Needed for functionality of `202-storage` / `206-homebackups` / `20#-immich`.
-  - Contains secrets for `203-nginx` / `204-ddns` / `206-homebackups` / `207-auth` / `20#-immich`.
-  - The config files can be edited to remove or alter these requirement.
-- `backup`
-  - Network storage accessing another machine.
-  - Needed for accessing backup files on `202-storage`.
- 
-Result: [images/proxmox-storage-configuration](images/proxmox-storage-configuration.png)
-
-💡 The storage setup can be simplified for setup and testing, with only one configured storage path.
-
-#### Service folder structure
-- `docker-compose.yml`
-- `.env` file (if needed)
-- Config file (if needed)
-- Example: [/machines/202-storage/](/machines/202-storage/)
-
-#### Mountpoints
-
-`ProxmoxVE` mountpoints "mount" / expose / inject folders from the host machine -> into folders in the hosted container. They are used here to distribute storage paths, service configuration files, secrets, and files created by the service.
-
-Example: [202.conf](/config/202.conf)
-  - `storage` mount `mp0: /mnt/pve/storage,mp=/mnt/storage`
-  - `backup` mount: `mp1: /mnt/pve/backup,mp=/mnt/backup`
-  - Service config mount: `mp2: /root/homelab/machines/202-storage,mp=/root/202`
-
-Result: [images/202-storage-folder-structure](images/202-storage-folder-structure.png)
-
-💡 This setup can be made simpler for private use by placing everything in the same folder.
-
-#### Secrets, Environment Variables, and service files
-
-Docker supports `.env` files to store environment variables to be used in `docker-compose.yml`. To avoid publicly exposing access tokens and secrets in this repository, they're stored in `storage` folders and accessed using `symlink` files.
-
-Example: [207.conf](/config/207.conf)
-- The real `.env` file with secrets is under `storage/containers/authentik`
-- The service folder contains a `symlink` pointing to the real `.env` file - under [/machines/207-auth/.env](/machines/207-auth/.env)
-- `ProxmoxVE` config mounts 2 folders - ℹ️ nested inside each other - under [/config/207.conf](/config/207.conf)
-- `mp0: /root/homelab/machines/207-auth,mp=/root/207`
-  - `mountpoint 0` mounts the service folder [/machines/207-auth/](/machines/207-auth/) to `/root/207` 
-- `mp1: /mnt/pve/storage/containers/authentik,mp=/root/207/authentik`
-  - `mountpoint 1` mounts the `storage` folder `/storage/containers/authentik` - ℹ️ inside -  `mountpoint 0`: [/machines/207-auth/](/machines/207-auth/)
- 
-Result: [images/207-auth-folder-structure](images/207-auth-folder-structure.png)
-
-💡 This setup can be made simpler for private use by placing everything in the same folder.
-
-#### Network configuration
-
-Services are configured to have matching container ID and internal ip for simplicity and consistentcy.
-
-- Starting with `200` for the `ProxmoxVE` web interface.
-- The port for any web UI is configured to be `8000` for most services.
-  - Example: `201-home` -> `192.168.1.201:8000`
-- In the case of `22#-immich`, to enable multi-tenancy, each with a separate container, it's is configured with the range of `22#`: `221`, `222`, `223`...
-- Reverse proxy is done by the `203-nginx` service. The configuration is not included here.
-  - This is due to the way `NginxProxyManager` manages configuration via a web UI and not config files.
-  - Currently exploring other reverse-proxy solutions that are config file based.
-
-Result: [images/network-configuration](images/network-configuration.png)
-
-💡 This setup is listed for example, and to explain values in config files in this repository. This can be customized for personal preferences and needs.
-
-#### Recommended terminal utilities
-
-- GUI Git client:
-  - https://github.com/jesseduffield/lazygit?tab=readme-ov-file#ubuntu
-- GUI file manager:
-  - https://github.com/MidnightCommander/mc
-  - https://askubuntu.com/questions/1071392/how-can-i-install-midnight-commander-on-ubuntu-18-04-1
-
-# Guides and tutorials
-
-- `ProxmoxVE` installation: https://youtu.be/7OVaWaqO2aU
-- Manual `lxc` creation: https://youtu.be/gHBSrENzeqk
-- `ProxmoxVE` Helper scripts: https://youtu.be/kcpu4z5eSEU
-- `201-home`: https://youtu.be/65Lhn90f3YI
-- `203-nginx`: https://youtu.be/sRI4Xhyedw4
-- `202-storage`: https://youtu.be/W2yZ5_sd9Hc
-  - Notes: The config files use `filebrowser quantum`, a fork of `filebrowser`.
-- `204-ddns` - DDNS explained: https://www.youtube.com/watch?v=rOLGvZagdC0
-- `207-auth`: https://www.youtube.com/playlist?list=PLH73rprBo7vSkDq-hAuXOoXx2es-1ExOP
-- `22#-immich`: https://immich.app/docs/overview/quick-start
-
-# Architecture Diagram
-
-<img width="800" src="architecture/diagram.png">
-
-# Example Setup
-
-#### Main node
-
-Dell OptiPlex 7050 - refurbished
-- Intel i5 6600 3.30GHz + 16gb memory
-- 256gb boot + 1tb storage 
-
-#### Backup node
-
-Dell OptiPlex 7050 - refurbished
-- Intel i3 7100T 3.40GHz + 8gb memory
-- 256gb boot + 1tb storage
-
-<img width="400" src="images/optiplex.png">
-
-<img width="800" src="images/system.jpeg">
-
-### Screenshots
-
-#### Phone
-
-| Home Assistant | Immich / Auth |
-|-------|-----------------------------------------|
-| <img width="200" src="images/homeassistant-phone.jpeg"> | <img width="200" src="images/immich-phone.jpeg"> |
-| <img width="200" src="images/homeassistant-controls-phone.jpeg"> | <img width="200" src="images/authentik-passwordless-phone.png"> |
-
-#### Web
-
-<img width="800" src="images/immich-web.png" />
-
-<img width="800" src="images/storage-web.png" />
-
-<img width="800" src="images/homeassistant-web.png" />
-
-<img width="800" src="images/authentik-web.png" />
-
-<img width="800" src="images/immich-login-web.png" />
-
-<img width="800" src="images/authentik-passwordless-web.png" />
-
-<img width="800" src="images/proxmox-web.png" />
-
-<img width="800" src="images/syncthing-web.png" />
-
-<img width="800" src="images/logs-web.png" />
+Local access works immediately with no configuration. Remote access requires explicit opt-in (security by default). The config is mounted as a volume, not baked into the image; changes apply on restart.
