@@ -18,15 +18,15 @@ echo ""
 echo "Generating secrets..."
 
 if ! grep -q "^POSTGRES_PASSWORD=" ./storage/env/004-authentik.env 2>/dev/null; then
-    printf "\nPOSTGRES_PASSWORD=%s\n" "$(openssl rand -base64 36)" >> ./storage/env/004-authentik.env
-    printf "AUTHENTIK_SECRET_KEY=%s\n" "$(openssl rand -base64 60)" >> ./storage/env/004-authentik.env
+    printf "\nPOSTGRES_PASSWORD=%s\n" "$(openssl rand -base64 36 | tr -d '\n')" >> ./storage/env/004-authentik.env
+    printf "AUTHENTIK_SECRET_KEY=%s\n" "$(openssl rand -base64 60 | tr -d '\n')" >> ./storage/env/004-authentik.env
     echo "  ✓ 004-authentik secrets generated"
 else
     echo "  - 004-authentik secrets already exist, skipping"
 fi
 
 if ! grep -q "^DB_PASSWORD=" ./storage/env/005-immich.env 2>/dev/null; then
-    printf "\nDB_PASSWORD=%s\n" "$(openssl rand -base64 36)" >> ./storage/env/005-immich.env
+    printf "\nDB_PASSWORD=%s\n" "$(openssl rand -base64 36 | tr -d '\n')" >> ./storage/env/005-immich.env
     echo "  ✓ 005-immich secrets generated"
 else
     echo "  - 005-immich secrets already exist, skipping"
