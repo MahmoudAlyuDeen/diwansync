@@ -2,8 +2,8 @@ services:
   filebrowser:
     user: 0:0
     volumes:
-      - ../../storage:/storage:rw
-      - ../../backup:/backup:rw
+      - ../../storage/media/001-filebrowser:/media:rw
+      - ../../storage:/storage:ro
       - ./config.yaml:/home/filebrowser/config.yaml
     ports:
       - '8002:80'
