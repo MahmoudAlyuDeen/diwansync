@@ -5,7 +5,7 @@ services:
     volumes:
       - ../../storage/media/001-filebrowser:/files:rw
       - ../../storage:/storage:rw
-      - ../../storage/volumes/001-filebrowser/database.db:/home/filebrowser/data/database.db
+      - ../../storage/volumes/001-filebrowser:/home/filebrowser/data
       - ./config.yaml:/home/filebrowser/data/config.yaml
     ports:
       - '8001:80'
