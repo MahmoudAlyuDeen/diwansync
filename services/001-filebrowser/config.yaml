@@ -2,7 +2,13 @@ server:
   port: 80
   sources:
     - path: "/storage"
+      name: "Storage"
+      config:
+        defaultEnabled: true
     - path: "/files"
+      name: "Files"
+      config:
+        defaultEnabled: true
 auth:
   methods:
     noauth: true
@@ -11,9 +17,13 @@ frontend:
   styling:
     customCSS: "reduce-rounded-corners.css"
 userDefaults:
-  darkMode: false
-  viewMode: "list"
-  showHidden: true
-  quickDownload: true
-  stickySidebar: true
-  editorQuickSave: true
+  ui:
+    darkMode: false
+  listing:
+    viewMode: "list"
+    showHidden: true
+    quickDownload: true
+  sidebar:
+    sticky: true
+  fileViewer:
+    editorQuickSave: true
