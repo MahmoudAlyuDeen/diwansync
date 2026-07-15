@@ -106,7 +106,8 @@ passwordLogin:
 reverseGeocoding:
   enabled: true
 server:
-  externalDomain: "${CONFIG_EXTERNAL_DOMAIN}"
+  # externalDomain: "${CONFIG_EXTERNAL_DOMAIN}"  # dynamic: set CONFIG_EXTERNAL_DOMAIN + run scripts/compile-immich-config.sh
+  externalDomain: ''
   loginPageMessage: Enter login information
   publicUsers: true
 storageTemplate:
