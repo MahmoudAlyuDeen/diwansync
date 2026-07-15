@@ -1,0 +1,11 @@
+notifications:
+  smtp:
+    enabled: true
+    from: ${SMTP_FROM}
+    replyTo: ''
+    transport:
+      host: ${SMTP_HOST}
+      ignoreCert: false
+      password: ${SMTP_PASSWORD}
+      port: ${SMTP_PORT}
+      username: ${SMTP_USERNAME}

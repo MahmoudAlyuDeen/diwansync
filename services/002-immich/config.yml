@@ -101,39 +101,12 @@ metadata:
     import: false
 newVersionCheck:
   enabled: false
-notifications:
-  smtp:
-    enabled: false
-    from: ''
-    replyTo: ''
-    transport:
-      host: ''
-      ignoreCert: false
-      password: ''
-      port: 587
-      username: ''
-# oauth:
-#   autoLaunch: true
-#   autoRegister: false
-#   buttonText: Use a security key
-#   clientId: ${CONFIG_OAUTH_CLIENT_ID}
-#   clientSecret: ${CONFIG_OAUTH_CLIENT_SECRET}
-#   defaultStorageQuota: 0
-#   enabled: true
-#   issuerUrl: ${CONFIG_OAUTH_ISSUER_URL}
-#   mobileOverrideEnabled: false
-#   mobileRedirectUri: ''
-#   profileSigningAlgorithm: none
-#   scope: openid email username
-#   signingAlgorithm: RS256
-#   storageLabelClaim: username
-#   storageQuotaClaim: immich_quota
 passwordLogin:
   enabled: true
 reverseGeocoding:
   enabled: true
 server:
-  externalDomain: ''
+  externalDomain: "${CONFIG_EXTERNAL_DOMAIN}"
   loginPageMessage: Enter login information
   publicUsers: true
 storageTemplate:
