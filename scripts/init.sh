@@ -20,7 +20,10 @@ echo ""
 echo "Generating secrets..."
 
 if ! grep -q "^POSTGRES_PASSWORD=" ./storage/env/005-authentik.env 2>/dev/null; then
-    printf "\nPOSTGRES_PASSWORD=%s\n" "$(openssl rand -base64 36 | tr -d '\n')" >> ./storage/env/005-authentik.env
+    # DB passwords use a URL-safe alphabet (hex): they get embedded in a Postgres
+    # connection string, where base64 chars like / + = corrupt parsing and cause
+    # "password authentication failed".
+    printf "\nPOSTGRES_PASSWORD=%s\n" "$(openssl rand -hex 24)" >> ./storage/env/005-authentik.env
     printf "AUTHENTIK_SECRET_KEY=%s\n" "$(openssl rand -base64 60 | tr -d '\n')" >> ./storage/env/005-authentik.env
     echo "  ✓ 005-authentik secrets generated"
 else
@@ -28,7 +31,8 @@ else
 fi
 
 if ! grep -q "^DB_PASSWORD=" ./storage/env/002-immich.env 2>/dev/null; then
-    printf "\nDB_PASSWORD=%s\n" "$(openssl rand -base64 36 | tr -d '\n')" >> ./storage/env/002-immich.env
+    # URL-safe (hex) for the same reason as above — Immich builds a postgresql:// URL.
+    printf "\nDB_PASSWORD=%s\n" "$(openssl rand -hex 24)" >> ./storage/env/002-immich.env
     echo "  ✓ 002-immich secrets generated"
 else
     echo "  - 002-immich secrets already exist, skipping"
