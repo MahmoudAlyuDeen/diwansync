@@ -1,5 +1,6 @@
 services:
   001-filebrowser:
+    profiles: ["001-filebrowser"]
     user: 0:0
     volumes:
       - ../../storage/media/001-filebrowser:/files:rw

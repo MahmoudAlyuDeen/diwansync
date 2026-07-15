@@ -1,5 +1,6 @@
 services:
   005-authentik-postgresql:
+    profiles: ["005-authentik"]
     image: docker.io/library/postgres:16-alpine
     restart: unless-stopped
     healthcheck:
@@ -17,6 +18,7 @@ services:
     env_file:
       - .env
   005-authentik-redis:
+    profiles: ["005-authentik"]
     image: docker.io/library/redis:alpine
     command: --save 60 1 --loglevel warning
     restart: unless-stopped
@@ -29,6 +31,7 @@ services:
     volumes:
       - ../../storage/volumes/005-authentik/redis:/data
   005-authentik-server:
+    profiles: ["005-authentik"]
     image: ghcr.io/goauthentik/server:2025.2.1
     restart: unless-stopped
     command: server
@@ -52,6 +55,7 @@ services:
       - 005-authentik-postgresql
       - 005-authentik-redis
   005-authentik-worker:
+    profiles: ["005-authentik"]
     image: ghcr.io/goauthentik/server:2025.2.1
     restart: unless-stopped
     command: worker

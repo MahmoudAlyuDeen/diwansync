@@ -10,6 +10,7 @@ name: immich
 
 services:
   002-immich-server:
+    profiles: ["002-immich"]
     container_name: immich_server
     image: ghcr.io/immich-app/immich-server:v1.139.3
     # extends:
@@ -37,6 +38,7 @@ services:
       disable: false
 
   002-immich-machine-learning:
+    profiles: ["002-immich"]
     container_name: immich_machine_learning
     # For hardware acceleration, add one of -[armnn, cuda, openvino] to the image tag.
     # Example tag: ${IMMICH_VERSION:-release}-cuda
@@ -53,6 +55,7 @@ services:
       disable: false
 
   002-immich-redis:
+    profiles: ["002-immich"]
     container_name: immich_redis
     image: docker.io/redis:6.2-alpine@sha256:e3b17ba9479deec4b7d1eeec1548a253acc5374d68d3b27937fcfe4df8d18c7e
     healthcheck:
@@ -60,6 +63,7 @@ services:
     restart: always
 
   002-immich-database:
+    profiles: ["002-immich"]
     container_name: immich_postgres
     image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
     environment:
