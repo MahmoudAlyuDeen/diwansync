@@ -50,7 +50,7 @@ Files are stored with flat, human-readable date-time naming: `2026-07-12_19-23-0
 
 Services are conveniences, not dependencies. You can stop using Immich and your photos are still right there in a folder, organized by date. You can stop using Filebrowser and your files are still right there.
 
-Remote access services (nginx, authentik, ddns) are optional. The setup runs fully locally without them by omitting those services from the compose file.
+Remote access services (nginx, authentik, ddns) are optional. Every service is gated by its own Compose profile (`[00N-name]`), and `COMPOSE_PROFILES` selects which ones start. It is persisted in `storage/env/000-diwanservices.env` and read via the repo-root `.env` symlink; the default is `001-filebrowser,002-immich`, so the setup runs fully locally out of the box.
 
 ## 2. Storage Architecture
 
@@ -98,23 +98,26 @@ The numbering is a cross-cutting identifier used consistently across directory n
 
 ## 5. Secrets & External Configuration
 
-Some services require secrets or config files that cannot be tracked in a public repository: database passwords, API keys, OAuth client credentials, and service-specific configuration like DDNS provider settings. These live in the persistent storage path under `storage/env/NNN-name.env` and `storage/volumes/NNN-name/`, mounted directly into the container. The service directory contains a `.env` symlink pointing to the corresponding file in `storage/env/`.
+Some services require secrets or config files that cannot be tracked in a public repository: database passwords, API keys, OAuth client credentials, and service-specific configuration like DDNS provider settings. These live in the persistent storage path under `storage/env/NNN-name.env` and `storage/volumes/NNN-name/`, mounted directly into the container. The service directory contains a `.env` symlink pointing to the corresponding file in `storage/env/`. A repo-root `.env` symlink points to `storage/env/000-diwanservices.env`, which Docker Compose auto-reads for `COMPOSE_PROFILES` (which services start).
 
 Secrets never enter the repository, so there is no risk of accidental exposure. All sensitive configuration is grouped under one root for backup and audit. The template files (`storage.template/env/`) contain placeholder values and documentation, serving as a reference for what each service expects.
 
 The `init.sh` convenience script auto-generates strong random secrets (`openssl rand -base64 36`) for services that need them (authentik, immich) and writes them into the storage path. Re-running init.sh is safe; it checks for existing values before overwriting.
 
-## 6. Immich Config Pipeline (Template, Seed, Compile)
+## 6. Immich Config Pipeline (Base, Seed, Compile)
 
-Immich requires a YAML config file for runtime settings (OAuth, machine learning, storage templates, etc.). This pipeline provides a working local setup out of the box with optional remote access as an explicit opt-in step.
+Immich requires a YAML config file for runtime settings (OAuth, machine learning, storage templates, etc.). The pipeline ships a working local setup out of the box, with OAuth and SMTP as opt-in blocks that are only merged in when enabled.
 
-**Stage 1: Template (`services/002-immich/config.yml`).**
-Ships with OAuth disabled by default (`enabled: ${CONFIG_OAUTH_ENABLED:-false}`). Works immediately for local access.
+**Base (`services/002-immich/config.yml`).**
+A complete, offline-valid config with no OAuth or SMTP block (Immich defaults both off when absent). Works immediately for local access.
 
-**Stage 2: Seed (`init.sh`).**
-On first run, copies `config.yml` to `/storage/volumes/002-immich/instance-config.yml`. Gives a working local setup with zero configuration. Idempotent: checks for existing file before copying.
+**Snippets (`config.oauth.snippet.yml`, `config.smtp.snippet.yml`).**
+Optional blocks holding only the OAuth and SMTP sections, with `${...}` placeholders. Kept out of the base so empty/invalid values can never break startup.
 
-**Stage 3: Compile (`services/002-immich/compile-remote-access.sh`).**
-Fills in OAuth env vars and runs `envsubst` to replace template variables. Overwrites the seeded config with the compiled remote-access version. Single command, no manual YAML editing.
+**Seed (`init.sh`).**
+On first run, copies the base `config.yml` to `/storage/volumes/002-immich/instance-config.yml`. Zero configuration, works locally. Idempotent: skips if the file already exists.
 
-Local access works immediately with no configuration. Remote access requires explicit opt-in (security by default). The config is mounted as a volume, not baked into the image; changes apply on restart.
+**Compile (`scripts/compile-immich-config.sh`).**
+Reads the `ENABLE_OAUTH` / `ENABLE_SMTP` flags and the filled `CONFIG_*` / `SMTP_*` values from `storage/env/002-immich.env`, then rebuilds `instance-config.yml` = base `+` each enabled snippet, running `envsubst` to fill values. Idempotent: the base write truncates and snippets append, so re-running never duplicates. Run it after changing a flag or value.
+
+Local access works with no compile. Remote access (OAuth) and email (SMTP) are explicit opt-ins (security by default). The config is mounted as a volume, not baked into the image; changes apply on restart.
