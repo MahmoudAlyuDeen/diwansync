@@ -19,7 +19,7 @@ services:
     volumes:
       # Do not edit the next line. If you want to change the media storage location on your system, edit the value of UPLOAD_LOCATION in the .env file
       - ../../storage/volumes/002-immich/upload:/usr/src/app/upload
-      - ../../storage/media/002-immich:/usr/src/app/upload/library
+      - ../../storage/media/002-immich/library:/usr/src/app/upload/library
       - ../../storage/volumes/002-immich/instance-config.yml:/config/config.yml
       - /etc/localtime:/etc/localtime:ro
     env_file:
