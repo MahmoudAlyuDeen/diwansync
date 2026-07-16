@@ -4,6 +4,8 @@
 # Writes only into ./storage (untracked). Re-run after changing flags/values.
 set -euo pipefail
 
+cd "$(dirname "$0")/.."   # repo root
+
 ENV_FILE=./storage/env/002-immich.env
 DIR=./services/002-immich
 OUT=./storage/volumes/002-immich/instance-config.yml
