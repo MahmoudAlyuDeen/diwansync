@@ -1,7 +1,7 @@
 services:
   006-ddns:
     profiles: ["006-ddns"]
-    image: qmcgaw/ddns-updater
+    image: qmcgaw/ddns-updater:v2.10.0
     container_name: ddns-updater
     user: 0:0
     network_mode: bridge

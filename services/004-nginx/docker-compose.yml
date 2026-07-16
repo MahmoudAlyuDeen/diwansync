@@ -2,7 +2,7 @@
   004-nginx:
     profiles: ["004-nginx"]
     container_name: nginx-proxy-manager
-    image: 'docker.io/jc21/nginx-proxy-manager:latest'
+    image: 'docker.io/jc21/nginx-proxy-manager:2.15.1'
     restart: unless-stopped
     ports:
       - '80:80'
