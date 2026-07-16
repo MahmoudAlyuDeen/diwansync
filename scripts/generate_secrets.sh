@@ -26,7 +26,7 @@ ensure_secret() {
         echo "    current: ${line#"${name}="}"
         if confirm "    rotate it? (breaks the existing deployment)"; then
             sed -i.bak "/^${name}=/d" "$file" && rm -f "${file}.bak"
-            printf '%s=%s\n' "$name" "$(gen_hex)" >> "$file"
+            printf '\n%s=%s\n' "$name" "$(gen_hex)" >> "$file"
             echo "  ✓ rotated"
         else
             echo "  - kept"
