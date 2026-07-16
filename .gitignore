@@ -14,3 +14,4 @@ merged-config.yml
 
 # storage pointer (created by setup.sh)
 /storage
+/storage-*backup-*
