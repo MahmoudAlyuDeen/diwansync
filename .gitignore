@@ -10,3 +10,6 @@ updates.json
 
 # merged config files - immich
 merged-config.yml
+
+# storage pointer (created by setup.sh)
+/storage
