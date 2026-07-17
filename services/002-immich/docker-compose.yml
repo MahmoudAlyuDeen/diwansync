@@ -26,13 +26,13 @@ services:
       - .env
     environment:
       IMMICH_CONFIG_FILE: /config/config.yml
-      DB_HOSTNAME: 002-immich-database
-      REDIS_HOSTNAME: 002-immich-redis
+      DB_HOSTNAME: database-002-immich
+      REDIS_HOSTNAME: redis-002-immich
     ports:
       - 8002:2283
     depends_on:
-      - 002-immich-redis
-      - 002-immich-database
+      - redis-002-immich
+      - database-002-immich
     restart: always
     healthcheck:
       disable: false
@@ -54,7 +54,7 @@ services:
     healthcheck:
       disable: false
 
-  002-immich-redis:
+  redis-002-immich:
     profiles: ["002-immich"]
     container_name: immich_redis
     image: docker.io/redis:6.2-alpine@sha256:e3b17ba9479deec4b7d1eeec1548a253acc5374d68d3b27937fcfe4df8d18c7e
@@ -62,7 +62,7 @@ services:
       test: redis-cli ping || exit 1
     restart: always
 
-  002-immich-database:
+  database-002-immich:
     profiles: ["002-immich"]
     container_name: immich_postgres
     image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0

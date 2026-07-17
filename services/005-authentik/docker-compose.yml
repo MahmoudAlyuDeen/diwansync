@@ -1,5 +1,5 @@
 services:
-  005-authentik-postgresql:
+  postgresql-005-authentik:
     profiles: ["005-authentik"]
     image: docker.io/library/postgres:16-alpine
     restart: unless-stopped
@@ -17,7 +17,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     env_file:
       - .env
-  005-authentik-redis:
+  redis-005-authentik:
     profiles: ["005-authentik"]
     image: docker.io/library/redis:7-alpine
     command: --save 60 1 --loglevel warning
@@ -36,8 +36,8 @@ services:
     restart: unless-stopped
     command: server
     environment:
-      AUTHENTIK_REDIS__HOST: ${REDIS_HOST}
-      AUTHENTIK_POSTGRESQL__HOST: ${POSTGRES_HOST}
+      AUTHENTIK_REDIS__HOST: redis-005-authentik
+      AUTHENTIK_POSTGRESQL__HOST: postgresql-005-authentik
       AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_USER}
       AUTHENTIK_POSTGRESQL__NAME: ${POSTGRES_DB}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
@@ -52,16 +52,16 @@ services:
       - 8005:9000
       - 9443:9443
     depends_on:
-      - 005-authentik-postgresql
-      - 005-authentik-redis
+      - postgresql-005-authentik
+      - redis-005-authentik
   005-authentik-worker:
     profiles: ["005-authentik"]
     image: ghcr.io/goauthentik/server:2025.2.1
     restart: unless-stopped
     command: worker
     environment:
-      AUTHENTIK_REDIS__HOST: ${REDIS_HOST}
-      AUTHENTIK_POSTGRESQL__HOST: ${POSTGRES_HOST}
+      AUTHENTIK_REDIS__HOST: redis-005-authentik
+      AUTHENTIK_POSTGRESQL__HOST: postgresql-005-authentik
       AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_USER}
       AUTHENTIK_POSTGRESQL__NAME: ${POSTGRES_DB}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
@@ -76,5 +76,5 @@ services:
     env_file:
       - .env
     depends_on:
-      - 005-authentik-postgresql
-      - 005-authentik-redis
+      - postgresql-005-authentik
+      - redis-005-authentik
