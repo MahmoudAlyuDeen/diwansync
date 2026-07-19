@@ -7,8 +7,6 @@ set -e
 cd "$(dirname "$0")/.."   # repo root
 
 secrets=(
-    "POSTGRES_PASSWORD    ./storage/env/005-authentik.env"
-    "AUTHENTIK_SECRET_KEY ./storage/env/005-authentik.env"
     "DB_PASSWORD          ./storage/env/002-immich.env"
 )
 
