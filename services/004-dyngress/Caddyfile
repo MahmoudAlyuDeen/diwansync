@@ -1,0 +1,15 @@
+# diwansync ingress — reverse proxy with automatic HTTPS.
+#
+# Reads DOMAIN and CADDY_TLS from .env. CADDY_TLS=internal serves self-signed
+# certs; set it to an email to get free Let's Encrypt certificates.
+# !Important: only services that do their own 2FA authentication are exposed here.
+
+files.{$DOMAIN} {
+	tls {$CADDY_TLS}
+	reverse_proxy 001-filebrowser:80
+}
+
+immich.{$DOMAIN} {
+	tls {$CADDY_TLS}
+	reverse_proxy immich_server:2283
+}

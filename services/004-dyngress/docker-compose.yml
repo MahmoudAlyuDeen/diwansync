@@ -1,0 +1,25 @@
+services:
+  004-caddy:
+    container_name: caddy
+    image: caddy:2.11.4-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    env_file:
+      - .env
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../../storage/volumes/004-dyngress/caddy-data:/data
+      - ../../storage/volumes/004-dyngress/caddy-config:/config
+
+  004-ddns-updater:
+    container_name: ddns-updater
+    image: qmcgaw/ddns-updater:v2.10.0
+    restart: unless-stopped
+    ports:
+      - "8004:8000"
+    environment:
+      PERIOD: ${DDNS_PERIOD}
+      CONFIG: '{"settings":[{"provider":"${DDNS_PROVIDER}","domain":"${DOMAIN}","group":"${DDNS_GROUP}","username":"${DDNS_USERNAME}","password":"${DDNS_PASSWORD}","ip_version":"ipv4"}]}'
