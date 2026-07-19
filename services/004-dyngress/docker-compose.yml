@@ -11,8 +11,8 @@ services:
       - .env
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ../../storage/volumes/004-dyngress/caddy-data:/data
-      - ../../storage/volumes/004-dyngress/caddy-config:/config
+      - caddy-data:/data
+      - caddy-config:/config
 
   004-ddns-updater:
     container_name: ddns-updater
@@ -23,3 +23,9 @@ services:
     environment:
       PERIOD: ${DDNS_PERIOD}
       CONFIG: '{"settings":[{"provider":"${DDNS_PROVIDER}","domain":"${DOMAIN}","group":"${DDNS_GROUP}","username":"${DDNS_USERNAME}","password":"${DDNS_PASSWORD}","ip_version":"ipv4"}]}'
+
+# caddy-data (certs) and caddy-config (autosave) are Docker-managed and kept out
+# of storage/ — both regenerate from the Caddyfile + env on redeploy.
+volumes:
+  caddy-data:
+  caddy-config:
