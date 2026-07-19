@@ -1,6 +1,5 @@
 services:
   003-syncthing:
-    profiles: ["003-syncthing"]
     image: syncthing/syncthing:2.1.2
     container_name: syncthing
     hostname: sync.storage

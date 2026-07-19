@@ -4,10 +4,6 @@ include:
   - services/001-filebrowser/docker-compose.yml
   - services/002-immich/docker-compose.yml
   - services/003-syncthing/docker-compose.yml
-  - services/004-nginx/docker-compose.yml
-  - services/005-authentik/docker-compose.yml
-  - services/006-ddns/docker-compose.yml
+  - services/004-dyngress/docker-compose.yml
 
-# Every service is defined above but gated by its own profile [00N-servicename].
-# Which ones start is set by COMPOSE_PROFILES, persisted in storage/env/000-diwanservices.env
-# and read via the repo-root .env symlink. Default: 001-filebrowser,002-immich.
+# Each service reads its own values from services/<name>/.env.
