@@ -14,11 +14,18 @@ Tracking the ongoing downsizing and hardening of the diwansync stack.
 
 ## Planned
 
-- [ ] **Authentication hardening**
-  - [ ] Filebrowser: replace `noauth` with password auth and enforce 2FA
-    (`auth.methods.password.enforcedOtp: true`; TOTP key + admin password via env).
-  - [ ] Immich: 2FA is a per-user setting (Account → Security) with no server-side
-    enforcement — documented as a setup step.
+- [ ] **Authentication** — a single Authelia instance in the ingress slot, used two ways:
+  - [ ] Forward-auth for Filebrowser and Syncthing: they stay unauthenticated
+    internally; Authelia gates remote access while local networks bypass it.
+  - [ ] OIDC for Immich: login flows through Authelia (mobile-app compatible) with
+    2FA enforced there; Immich's own per-user 2FA is disabled as redundant.
+  - [ ] Resting state: setup generates Authelia's secrets and seeds an admin user so
+    it boots before configuration; the default policy requires 2FA from outside and
+    bypasses local networks.
+- [ ] **Bypass `/api` and `/share` paths** for both core services so mobile apps,
+  API clients, and share links keep working, relying on each app's native auth.
+- [ ] **User-management script** — add / list / remove Authelia users with secure
+  (argon2) password hashing.
 - [ ] **Security hardening** — evaluate a Caddy-attached layer for filtering common
   attacks (e.g. CrowdSec, Coraza/OWASP WAF), kept minimal and essential.
 - [ ] **Pinned versions → env** — move each service's image tag into its env file so
