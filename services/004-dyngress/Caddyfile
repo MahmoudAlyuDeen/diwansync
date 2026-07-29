@@ -1,25 +1,54 @@
-# diwansync ingress — reverse proxy with automatic HTTPS.
+# diwansync ingress — reverse proxy with automatic HTTPS and Authelia forward-auth.
 #
 # Reads DOMAIN and CADDY_TLS from .env. CADDY_TLS=internal serves self-signed
 # certs; set it to an email to get free Let's Encrypt certificates.
-# !Important: only services that do their own 2FA authentication are exposed here.
 
 files.{$DOMAIN} {
 	tls {$CADDY_TLS}
+
+	# Public share links — no auth required.
+	handle_path /public/share* {
+		reverse_proxy 001-filebrowser:80
+	}
+
+	forward_auth 004-authelia:9004 {
+		uri /api/authz/forward-auth
+	}
 	reverse_proxy 001-filebrowser:80
 }
 
 immich.{$DOMAIN} {
 	tls {$CADDY_TLS}
+
+	# Public share links — no auth required (authelia handles CSRF via referer).
+	handle_path /share* {
+		reverse_proxy immich_server:2283
+	}
+
+	# Everything else requires forward-auth
+	forward_auth 004-authelia:9004 {
+		uri /api/authz/forward-auth
+	}
 	reverse_proxy immich_server:2283
 }
 
 sync.{$DOMAIN} {
 	tls {$CADDY_TLS}
+	forward_auth 004-authelia:9004 {
+		uri /api/authz/forward-auth
+	}
 	reverse_proxy 003-syncthing:8384
 }
 
 ddns.{$DOMAIN} {
 	tls {$CADDY_TLS}
+	forward_auth 004-authelia:9004 {
+		uri /api/authz/forward-auth
+	}
 	reverse_proxy 004-ddns-updater:8000
+}
+
+auth.{$DOMAIN} {
+	tls {$CADDY_TLS}
+	reverse_proxy 004-authelia:9004
 }
