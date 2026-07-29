@@ -9,7 +9,7 @@ set -euo pipefail
 cd "$(dirname "$0")"   # repo root
 LINK="storage"
 
-confirm() { local r; read -rp "$1 [y/N] " r; [[ "${r:-N}" == [Yy]* ]]; }
+confirm() { local r; read -rp "$1 [y/n] " r; [[ "${r:-n}" == [Yy]* ]]; }
 
 # Symlink $LINK -> target, creating the target (with sudo if needed).
 link_to() {
@@ -105,15 +105,25 @@ else
     echo "Skipped seeding."
 fi
 
-# --- 3. generate secrets ---
+# --- 3. generate secrets --- (can be skipped, run scripts/generate_secrets.sh later) ---
 echo ""
-if confirm "Generate secrets now?"; then
+if confirm "Generate secrets now? Skip if redeploying - Can run later"; then
     bash scripts/generate_secrets.sh
 else
     echo "Skipped generate_secrets."
 fi
 
-# --- 4. start the stack ---
+# --- 4. authelia user setup (can be skipped, run scripts/setup_authelia_user.sh later) ---
+echo ""
+if confirm "Configure Authelia users? Skip if redeploying - Can run later"; then
+    if ! bash scripts/setup_authelia_user.sh; then
+        echo "  ! Authelia user setup failed — you can retry with scripts/setup_authelia_user.sh"
+    fi
+else
+    echo "Skipped. Run scripts/setup_authelia_user.sh later to set up admin access."
+fi
+
+# --- 5. start the stack ---
 echo ""
 if confirm "Start the stack now (docker compose up -d)?"; then
     if ! command -v docker >/dev/null 2>&1; then
