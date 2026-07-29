@@ -1,4 +1,17 @@
 services:
+  004-authelia:
+    container_name: authelia
+    image: authelia/authelia:latest
+    restart: unless-stopped
+    ports:
+      - "9004:9004"
+    env_file:
+      - .env
+    volumes:
+      - ./authelia/configuration.yml:/config/configuration.yml:ro
+      - ../../storage/volumes/004-dyngress/authelia/users_database.yml:/users_database.yml:ro
+      - ../../storage/volumes/004-dyngress/:/opt/authelia/:rw
+
   004-caddy:
     container_name: caddy
     image: caddy:2.11.4-alpine
@@ -11,8 +24,8 @@ services:
       - .env
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
+      - ../../storage/volumes/004-dyngress/caddy/data:/data
+      - ../../storage/volumes/004-dyngress/caddy/config:/config
 
   004-ddns-updater:
     container_name: ddns-updater
@@ -23,9 +36,3 @@ services:
     environment:
       PERIOD: ${DDNS_PERIOD}
       CONFIG: '{"settings":[{"provider":"${DDNS_PROVIDER}","domain":"${DOMAIN}","group":"${DDNS_GROUP}","username":"${DDNS_USERNAME}","password":"${DDNS_PASSWORD}","ip_version":"ipv4"}]}'
-
-# caddy-data (certs) and caddy-config (autosave) are Docker-managed and kept out
-# of storage/ — both regenerate from the Caddyfile + env on redeploy.
-volumes:
-  caddy-data:
-  caddy-config:
