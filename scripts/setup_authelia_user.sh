@@ -129,7 +129,24 @@ menu() {
 }
 
 while true; do
-    read -rp "Choose [1-5]: " choice
+    list_users
+
+    USER_COUNT=$(python3 -c "import yaml,sys; print(len(yaml.safe_load(open(sys.argv[1])).get('users',{})))" "$USERS_DB")
+
+    echo ""
+    if [ "$USER_COUNT" -gt 0 ]; then
+        echo "  1) Generate new user credentials"
+        echo "  2) Reset a user password"
+        echo "  3) Toggle enable / disable a user"
+        echo "  4) Delete a user"
+        echo "  5) Quit"
+    else
+        echo "  1) Generate new user credentials"
+        echo "  2) Quit"
+    fi
+    echo ""
+
+    read -rp "Choose [1-$( [ "$USER_COUNT" -gt 0 ] && echo 5 || echo 2 )]: " choice
 
     case "${choice:-5}" in
         1)
@@ -155,17 +172,32 @@ while true; do
             ;;
 
         2)
+            [ "$USER_COUNT" -eq 0 ] && { echo "  - Done."; exit 0; }
             # === RESET PASSWORD ===
-            list_users
+            python3 - "$USERS_DB" <<'PYEOF'
+import yaml, sys
+db = yaml.safe_load(open(sys.argv[1]))
+users = db.get('users', {})
+for i, (name, info) in enumerate(users.items(), 1):
+    status = "enabled" if not info.get("disabled", False) else "DISABLED"
+    print(f"  {i}) {name:20} [{status}]")
+PYEOF
 
             while true; do
-                read -rp "Username: " username
-                if [ -z "$username" ]; then echo "  Username is required."; continue; fi
-                if ! user_exists "$username"; then
-                    echo "  ✗ User not found. (Ctrl+C to quit, or re-type)."
-                else
-                    break
-                fi
+                read -rp "User number: " usernum
+                username=$(python3 - "$USERS_DB" "$usernum" <<'PYEOF'
+import yaml, sys
+try:
+    idx = int(sys.argv[2]) - 1
+    users = list(yaml.safe_load(open(sys.argv[1])).get('users', {}).keys())
+    print(users[idx] if 0 <= idx < len(users) else "")
+except (ValueError, IndexError):
+    print("__INVALID__")
+PYEOF
+                ) || true
+                [ -z "$username" ] && echo "  Invalid." && continue
+                echo "  → $username"
+                break
             done
 
             # Show current user details before reset
@@ -181,17 +213,32 @@ while true; do
             ;;
 
         3)
+            [ "$USER_COUNT" -eq 0 ] && { echo "  - Done."; exit 0; }
             # === TOGGLE ENABLE/DISABLE ===
-            list_users
+            python3 - "$USERS_DB" <<'PYEOF'
+import yaml, sys
+db = yaml.safe_load(open(sys.argv[1]))
+users = db.get('users', {})
+for i, (name, info) in enumerate(users.items(), 1):
+    status = "enabled" if not info.get("disabled", False) else "DISABLED"
+    print(f"  {i}) {name:20} [{status}]")
+PYEOF
 
             while true; do
-                read -rp "Username: " username
-                if [ -z "$username" ]; then echo "  Username is required."; continue; fi
-                if ! user_exists "$username"; then
-                    echo "  ✗ User not found. (Ctrl+C to quit, or re-type)."
-                else
-                    break
-                fi
+                read -rp "User number: " usernum
+                username=$(python3 - "$USERS_DB" "$usernum" <<'PYEOF'
+import yaml, sys
+try:
+    idx = int(sys.argv[2]) - 1
+    users = list(yaml.safe_load(open(sys.argv[1])).get('users', {}).keys())
+    print(users[idx] if 0 <= idx < len(users) else "")
+except (ValueError, IndexError):
+    print("__INVALID__")
+PYEOF
+                ) || true
+                [ -z "$username" ] && echo "  Invalid." && continue
+                echo "  → $username"
+                break
             done
 
             # Show current state
@@ -225,17 +272,32 @@ print('enabled' if not u.get('disabled', False) else 'DISABLED')
             ;;
 
         4)
+            [ "$USER_COUNT" -eq 0 ] && { echo "  - Done."; exit 0; }
             # === DELETE USER ===
-            list_users
+            python3 - "$USERS_DB" <<'PYEOF'
+import yaml, sys
+db = yaml.safe_load(open(sys.argv[1]))
+users = db.get('users', {})
+for i, (name, info) in enumerate(users.items(), 1):
+    status = "enabled" if not info.get("disabled", False) else "DISABLED"
+    print(f"  {i}) {name:20} [{status}]")
+PYEOF
 
             while true; do
-                read -rp "Username to delete: " username
-                if [ -z "$username" ]; then echo "  Username is required."; continue; fi
-                if ! user_exists "$username"; then
-                    echo "  ✗ User not found. (Ctrl+C to quit, or re-type)."
-                else
-                    break
-                fi
+                read -rp "User number to delete: " usernum
+                username=$(python3 - "$USERS_DB" "$usernum" <<'PYEOF'
+import yaml, sys
+try:
+    idx = int(sys.argv[2]) - 1
+    users = list(yaml.safe_load(open(sys.argv[1])).get('users', {}).keys())
+    print(users[idx] if 0 <= idx < len(users) else "")
+except (ValueError, IndexError):
+    print("__INVALID__")
+PYEOF
+                ) || true
+                [ -z "$username" ] && echo "  Invalid." && continue
+                echo "  → $username"
+                break
             done
 
             # Show current state using python
@@ -260,5 +322,4 @@ print('enabled' if not u.get('disabled', False) else 'DISABLED')
             ;;
     esac
 
-    menu
 done
