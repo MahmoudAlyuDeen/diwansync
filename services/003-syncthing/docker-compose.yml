@@ -1,8 +1,8 @@
 services:
   003-syncthing:
     image: syncthing/syncthing:2.1.2
-    container_name: syncthing
-    hostname: sync.storage
+    container_name: 003-syncthing
+    hostname: 003-syncthing
     volumes:
       - ../../storage:/storage
       - ../../storage/volumes/003-syncthing:/var/syncthing
