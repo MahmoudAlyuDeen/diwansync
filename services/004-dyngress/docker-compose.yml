@@ -1,6 +1,6 @@
 services:
-  004-authelia:
-    container_name: authelia
+  004-dyngress-authelia:
+    container_name: 004-dyngress-authelia
     image: authelia/authelia:latest
     restart: unless-stopped
     ports:
@@ -12,8 +12,8 @@ services:
       - ../../storage/volumes/004-dyngress/authelia/users_database.yml:/users_database.yml:ro
       - ../../storage/volumes/004-dyngress/:/opt/authelia/:rw
 
-  004-caddy:
-    container_name: caddy
+  004-dyngress-caddy:
+    container_name: 004-dyngress-caddy
     image: caddy:2.11.4-alpine
     restart: unless-stopped
     ports:
@@ -27,8 +27,8 @@ services:
       - ../../storage/volumes/004-dyngress/caddy/data:/data
       - ../../storage/volumes/004-dyngress/caddy/config:/config
 
-  004-ddns-updater:
-    container_name: ddns-updater
+  004-dyngress-ddns-updater:
+    container_name: 004-dyngress-ddns-updater
     image: qmcgaw/ddns-updater:v2.10.0
     restart: unless-stopped
     ports:
