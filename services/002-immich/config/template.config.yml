@@ -21,7 +21,6 @@ ffmpeg:
   crf: 23
   gopSize: 0
   maxBitrate: '0'
-  npl: 0
   preferredHwDevice: auto
   preset: ultrafast
   refs: 0
@@ -106,8 +105,7 @@ passwordLogin:
 reverseGeocoding:
   enabled: true
 server:
-  # externalDomain: "${CONFIG_EXTERNAL_DOMAIN}"  # dynamic: set CONFIG_EXTERNAL_DOMAIN + run scripts/compile-immich-config.sh
-  externalDomain: ''
+  externalDomain: "${CONFIG_EXTERNAL_DOMAIN}"
   loginPageMessage: Enter login information
   publicUsers: true
 storageTemplate:
