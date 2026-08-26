@@ -12,19 +12,16 @@ services:
   002-immich-server:
     container_name: 002-immich-server
     image: ghcr.io/immich-app/immich-server:v2.7.2
-    # extends:
-    #   file: hwaccel.transcoding.yml
-    #   service: cpu # set to one of [nvenc, quicksync, rkmpp, vaapi, vaapi-wsl] for accelerated transcoding
     volumes:
-      # Do not edit the next line. If you want to change the media storage location on your system, edit the value of UPLOAD_LOCATION in the .env file
       - ../../storage/volumes/002-immich/upload:/usr/src/app/upload
       - ../../storage/media/002-immich/library:/usr/src/app/upload/library
-      - ../../storage/volumes/002-immich/instance-config.yml:/config/config.yml
+      - ./config:/config:ro
       - /etc/localtime:/etc/localtime:ro
+    entrypoint: ["/bin/bash", "-c", "/config/compile.sh && exec start.sh"]
     env_file:
       - .env
     environment:
-      IMMICH_CONFIG_FILE: /config/config.yml
+      IMMICH_CONFIG_FILE: /compiled/config.yml
       DB_HOSTNAME: 002-immich-postgres
       REDIS_HOSTNAME: 002-immich-redis
     ports:
@@ -33,6 +30,8 @@ services:
       - 002-immich-redis
       - 002-immich-postgres
     restart: always
+    # noinspection ComposeMissingKeys
+    # healthcheck is implemented by the image
     healthcheck:
       disable: false
 
@@ -49,6 +48,8 @@ services:
     env_file:
       - .env
     restart: always
+    # noinspection ComposeMissingKeys
+    # healthcheck is implemented by the image
     healthcheck:
       disable: false
 
