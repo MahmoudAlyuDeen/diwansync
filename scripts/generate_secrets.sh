@@ -1,5 +1,5 @@
 #!/bin/bash
-# Generate or rotate per-service secrets, then seed Immich's instance config.
+# Generate or rotate per-service secrets, then seed Immich's instance template.
 # Existing secrets are shown and kept unless you choose to rotate.
 # Safe to run standalone; run after setup.sh has wired ./storage.
 set -e
@@ -56,17 +56,6 @@ for entry in "${secrets[@]}"; do
     read -r name file <<< "$entry"
     ensure_secret "$name" "$file" "$idx" "$total"
 done
-
-# Seed Immich's instance config from the base template (no compile).
-cfg=./storage/volumes/002-immich/instance-config.yml
-echo ""
-if [ -f "$cfg" ]; then
-    echo "  ✓ 002-immich instance config already exists, skipping"
-else
-    echo "  ✓ Seeding 002-immich instance config..."
-    mkdir -p "$(dirname "$cfg")"
-    cp ./services/002-immich/config.yml "$cfg"
-fi
 
 echo ""
 echo "Secrets ready."
