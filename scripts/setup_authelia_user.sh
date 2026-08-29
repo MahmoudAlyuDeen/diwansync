@@ -16,11 +16,11 @@ print_user_list() {
     echo ""
 
     if [ -n "$user_list" ]; then
-        while IFS=$'\t' read -r idx name status; do
-            echo "$idx. $name [$status]"
-        done <<< "$user_list"
+        printf "no. DISABLED\tEMAIL\n"
+        echo ""
+        printf '%s\n' "$user_list"
     else
-        echo "— no users yet"
+        echo "- no users yet"
     fi
 
     # Pass same raw param to menu
@@ -86,10 +86,8 @@ create() {
         # Use email as-is for all three fields (lowercased)
         email_input=$(printf '%s' "$email_input" | tr '[:upper:]' '[:lower:]')
 
-        # Duplicate check against existing usernames in DB
-        local existing_usernames
-        existing_usernames=$(printf '%s\n' "$user_list" | cut -f2)
-        [[ "$existing_usernames" == *"$email_input"* ]] && { msg_user_already_exists "$email_input"; continue; }
+        # Duplicate check against existing user keys in DB
+        [[ "$user_list" == *"$email_input"* ]] && { msg_user_already_exists "$email_input"; continue; }
         break
     done
 
@@ -175,7 +173,10 @@ select_user() {
         local selected_line
         selected_line=$(printf '%s\n' "$user_list" | sed -n "${input_number}p")
         [ -z "$selected_line" ] && { msg_invalid_choice >&2; continue; }
-        printf '%s\n' "$(printf '%s' "$selected_line" | cut -f2)"
+
+        local selected_key; read -r _ _ selected_key <<< "$selected_line"
+        echo "→ Selected: $selected_key" >&2
+        printf '%s\n' "$selected_key"
         break
     done
 }
@@ -212,11 +213,8 @@ if database_mutation:
             f, default_flow_style=False, allow_unicode=True
         )
 
-for idx, (name, info) in enumerate(user_entries.items(), 1):
-    status = "enabled" if not info.get("disabled", False) else "DISABLED"
-    email_val = info.get("email", "")
-    label = email_val if email_val else name
-    print(f"{idx}\t{label}\t{status}")
+for print_index, (user_key, entry) in enumerate(user_entries.items(), 1):
+    print(f"{print_index:02d}. {str(entry['disabled']).lower()}\t{user_key}")
 PYEOF
     ); then
         echo "" >&2
