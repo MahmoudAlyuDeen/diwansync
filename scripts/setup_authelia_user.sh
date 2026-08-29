@@ -93,7 +93,7 @@ create() {
         break
     done
 
-    local HASH=$(get_password_hash_from_input)
+    local HASH=$(get_password_hash_from_input "$(msg_prompt_password)")
 
     local mutation="user_entries['${email_input}'] = dict(email='$email_input', displayname='${email_input}', disabled=False, password='${HASH}')"
     updated_user_list=$(perform_database_operation "$mutation")
@@ -109,7 +109,7 @@ reset_password() {
 
     local selected_user_key=$(select_user "$user_list")
 
-    local HASH=$(get_password_hash_from_input)
+    local HASH=$(get_password_hash_from_input "$(msg_prompt_new_password)")
 
     local mutation="if \"${selected_user_key}\" in user_entries: user_entries[\"${selected_user_key}\"][\"password\"] = \"${HASH}\""
     updated_user_list=$(perform_database_operation "$mutation")
@@ -228,7 +228,7 @@ PYEOF
 
 get_password_hash_from_input() {
     while true; do
-        read -rsp "$(msg_prompt_password)" PASSWORD >&2; echo "" >&2
+        read -rsp "$1" PASSWORD >&2; echo "" >&2
         read -rsp "$(msg_prompt_confirm_pwd)" CONFIRM >&2; echo "" >&2
         [ -n "$PASSWORD" ] && [ "$PASSWORD" = "$CONFIRM" ] && break
         msg_pwd_mismatch >&2
@@ -247,6 +247,7 @@ msg_done()                   { echo "✓ Done"; }
 
 msg_prompt_email()           { echo "Email:"; }
 msg_prompt_password()        { echo "Password:"; }
+msg_prompt_new_password()    { echo "New password:"; }
 msg_prompt_confirm_pwd()     { echo "Confirm password:"; }
 msg_prompt_user_number()     { echo "Enter user number:"; }
 msg_confirm_enable()         { echo "Enable this user?"; }
