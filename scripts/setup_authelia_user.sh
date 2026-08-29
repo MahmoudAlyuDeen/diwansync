@@ -169,9 +169,12 @@ select_user() {
     local user_list="$1"
     while true; do
         read -rp "$(msg_prompt_user_number) " input_number
-        [[ $input_number =~ ^[0-9]+$ ]] || continue
-        local selected_line
-        selected_line=$(printf '%s\n' "$user_list" | sed -n "${input_number}p")
+
+        local selected_line=""
+        if [[ $input_number =~ ^[0-9]+$ ]]; then
+            selected_line=$(printf '%s\n' "$user_list" | sed -n "${input_number}p")
+        fi
+
         [ -z "$selected_line" ] && { msg_invalid_choice >&2; continue; }
 
         local selected_key; read -r _ _ selected_key <<< "$selected_line"
@@ -255,6 +258,7 @@ msg_warn_delete()            { echo "Delete permanently? This cannot be undone."
 msg_email_invalid()          { echo "Invalid email, must be a valid email, e.g: abc@xyz.tld.
 This is needed to send authentication emails to allow user enrollement.
 Try again (Ctrl+C to quit)."; }
+
 msg_invalid_choice()         { echo "Invalid choice. Try again (Ctrl+C to quit)."; }
 msg_user_already_exists()    { echo "User '$1' already exists. Try again (Ctrl+C to quit)."; }
 msg_pwd_mismatch()           { echo "✗ Passwords do not match. Try again (Ctrl+C to quit)."; }
