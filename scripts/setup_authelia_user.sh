@@ -75,6 +75,7 @@ menu() {
 # --- user operations -------------------------------------------------------
 create() {
     local user_list="$1"
+    docker ps >/dev/null 2>&1 || { msg_docker_hash_required; return 1; }
 
     local email_regex='^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
 
@@ -104,6 +105,8 @@ create() {
 
 reset_password() {
     local user_list="$1"
+    docker ps >/dev/null 2>&1 || { msg_docker_hash_required; return 1; }
+
     local USERNAME_SELECTED=$(select_user "$user_list")
 
     echo "→ User: $USERNAME_SELECTED"
@@ -238,7 +241,6 @@ get_password_hash_from_input() {
 
     local docker_output
     echo "Hashing password..." >&2
-    command -v docker >/dev/null 2>&1 || { msg_docker_hash_required >&2; return 1; }
     docker_output=$(docker run --rm "$AUTHELIA_DOCKER_IMAGE" \
           authelia crypto hash generate argon2 \
           --password "$PASSWORD" --no-confirm 2>&1) || { msg_docker_hash_required >&2; return 1; }
@@ -265,7 +267,7 @@ then run scripts/setup_authelia_user_reorder.sh again or edit it manually."; }
 
 msg_cancelled()              { echo "✓ cancelled"; }
 msg_docker_hash_required()   { echo "✗ Docker is required to generate password hashes.
-    Install it or start the daemon, then run scripts/setup_authelia_user_reorder.sh again."; }
+Install or start docker then run scripts/setup_authelia_user_reorder.sh again."; }
 
 # --- execution entry point -------------------------------------------------
 user_list=$(perform_database_operation "")
