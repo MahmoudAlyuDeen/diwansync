@@ -18,44 +18,42 @@ secrets=(
 confirm() { local r; read -rp "$1 [y/n] " r; [[ "${r:-n}" == [Yy]* ]]; }
 gen_hex() { openssl rand -hex 24; }
 
-# ensure_secret <name> <file> <idx> <total>
-ensure_secret() {
-    local name="$1" file="$2" idx="$3" total="$4" line current newval
+total=${#secrets[@]}; index=0
+for entry in "${secrets[@]}"; do
+    index=$((index + 1))
+    read -r file name <<< "$entry"
 
     echo ""
-    if line="$(grep -m1 "^${name}=" "$file" 2>/dev/null)"; then
-        echo "[${idx}/${total}] ${name} exists in ${file}"
-        echo "    current: ${line#"${name}="}"
-        if confirm "    rotate it? (breaks the existing deployment)"; then
+    # Check if secret already exists in the target env file.
+    line=$(grep -m1 "^${name}=" "$file" 2>/dev/null) || true
+    if [ -n "${line:-}" ]; then
+        echo "[${index}/${total}] A secret already exists:"
+        echo "${file}"
+        echo "${line}"
+        if confirm "Backup and generate a new secret?"; then
 
             # Double-confirm before writing
-            if confirm "   ⚠⚠ Are you sure you want to rotate? !This breaks existing deployments. Existing value will be commented out and preserved."; then
-                echo "   ⚠ Rotating ${name} in ${file}..."
-                # Comment out old value in-place
-                sed -i.bak "s/^${name}=/# ROTATED: ${name}=/" "$file" && rm -f "${file}.bak"
+            if confirm "Careful: Rotating might break existing deployments.
+Existing secret will be retained so you can manually reverse this.
+Are you sure?"; then
+                echo "Rotating ${name} in ${file}..."
+                sed -i '' "s/^${name}=/# ROTATED: ${name}=/" "$file"
 
                 printf '\n%s=%s\n' "$name" "$(gen_hex)" >> "$file"
-                echo "  ✓ rotated (old value commented out)"
+                echo "rotated (old value commented out)"
 
             else
-                echo "   ✗ Rotation cancelled. Keeping existing value."
+                echo "Rotation cancelled. Keeping existing value."
             fi
-            
+
         else
-            echo "  ✓ kept — no changes made"
+            echo "kept, no changes made"
         fi
     else
         printf '\n%s=%s\n' "$name" "$(gen_hex)" >> "$file"
-        echo "[${idx}/${total}] ${name} generated in ${file} ✓"
+        echo "[${index}/${total}] ${name} generated in ${file}"
     fi
-}
-
-total=${#secrets[@]}; idx=0
-for entry in "${secrets[@]}"; do
-    idx=$((idx + 1))
-    read -r file name <<< "$entry"
-    ensure_secret "$name" "$file" "$idx" "$total"
 done
 
 echo ""
-echo "Secrets ready."
+echo "✓ Secrets ready."
