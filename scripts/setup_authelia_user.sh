@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."   # repo root
 
-USERS_DB="storage/volumes/004-dyngress/authelia/users_database.yml"
+USERS_DB_PATH="storage/volumes/004-dyngress/authelia/users_database.yml"
 AUTHELIA_DOCKER_IMAGE="authelia/authelia:latest"
 
 # --- menu ------------------------------------------------------------------
@@ -12,7 +12,7 @@ print_user_list() {
 
     clear   # wipe screen before re-rendering table
 
-    echo "$USERS_DB"
+    echo "$USERS_DB_PATH"
     echo ""
 
     if [ -n "$user_list" ]; then
@@ -192,7 +192,7 @@ confirm() {
 
 perform_database_operation() {
     local output
-    if ! output=$(python3 - "$1" "${USERS_DB}" << 'PYEOF' 2>&1
+    if ! output=$(python3 - "$1" "${USERS_DB_PATH}" << 'PYEOF' 2>&1
 import sys, yaml
 
 database_mutation = sys.argv[1]
@@ -260,8 +260,8 @@ msg_invalid_choice()         { echo "Invalid choice. Try again (Ctrl+C to quit).
 msg_user_already_exists()    { echo "User '$1' already exists. Try again (Ctrl+C to quit)."; }
 msg_pwd_mismatch()           { echo "✗ Passwords do not match. Try again (Ctrl+C to quit)."; }
 
-msg_db_operation_failed()    { echo "Database operation failed. Please ensure $USERS_DB exists,
-    then run scripts/setup_authelia_user_reorder.sh again or edit it manually."; }
+msg_db_operation_failed()    { echo "Database operation failed. Please ensure $USERS_DB_PATH exists,
+then run scripts/setup_authelia_user_reorder.sh again or edit it manually."; }
 
 msg_cancelled()              { echo "✓ cancelled"; }
 msg_docker_hash_required()   { echo "✗ Docker is required to generate password hashes.
