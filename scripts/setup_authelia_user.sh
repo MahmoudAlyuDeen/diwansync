@@ -107,13 +107,11 @@ reset_password() {
     local user_list="$1"
     docker ps >/dev/null 2>&1 || { msg_docker_hash_required; return 1; }
 
-    local USERNAME_SELECTED=$(select_user "$user_list")
-
-    echo "→ User: $USERNAME_SELECTED"
+    local selected_user_key=$(select_user "$user_list")
 
     local HASH=$(get_password_hash_from_input)
 
-    local mutation="if \"${USERNAME_SELECTED}\" in user_entries: user_entries[\"${USERNAME_SELECTED}\"][\"password\"] = \"${HASH}\""
+    local mutation="if \"${selected_user_key}\" in user_entries: user_entries[\"${selected_user_key}\"][\"password\"] = \"${HASH}\""
     updated_user_list=$(perform_database_operation "$mutation")
     msg_done
 
@@ -123,11 +121,10 @@ reset_password() {
 
 enable_user() {
     local user_list="$1"
-    local USERNAME_SELECTED=$(select_user "$user_list")
-    echo "→ will ENABLE ($USERNAME_SELECTED)"
+    local selected_user_key=$(select_user "$user_list")
     local updated_user_list="$user_list"
-    if confirm "Proceed?"; then
-        local mutation="if \"${USERNAME_SELECTED}\" in user_entries: user_entries[\"${USERNAME_SELECTED}\"][\"disabled\"] = False"
+    if confirm "$(msg_confirm_enable)"; then
+        local mutation="if \"${selected_user_key}\" in user_entries: user_entries[\"${selected_user_key}\"][\"disabled\"] = False"
         updated_user_list=$(perform_database_operation "$mutation")
         msg_done
     else
@@ -140,11 +137,10 @@ enable_user() {
 
 disable_user() {
     local user_list="$1"
-    local USERNAME_SELECTED=$(select_user "$user_list")
-    echo "→ will DISABLE ($USERNAME_SELECTED)"
+    local selected_user_key=$(select_user "$user_list")
     local updated_user_list="$user_list"
-    if confirm "Proceed?"; then
-        local mutation="if \"${USERNAME_SELECTED}\" in user_entries: user_entries[\"${USERNAME_SELECTED}\"][\"disabled\"] = True"
+    if confirm "$(msg_confirm_disable)"; then
+        local mutation="if \"${selected_user_key}\" in user_entries: user_entries[\"${selected_user_key}\"][\"disabled\"] = True"
         updated_user_list=$(perform_database_operation "$mutation")
         msg_done
     else
@@ -157,11 +153,10 @@ disable_user() {
 
 delete_user() {
     local user_list="$1"
-    local USERNAME_SELECTED=$(select_user "$user_list")
-    echo "→ User: $USERNAME_SELECTED"
+    local selected_user_key=$(select_user "$user_list")
     local updated_user_list="$user_list"
-    if confirm "This cannot be undone. Proceed?"; then
-        local mutation="user_entries.pop(\"${USERNAME_SELECTED}\", None)"
+    if confirm "$(msg_warn_delete)"; then
+        local mutation="user_entries.pop(\"${selected_user_key}\", None)"
         updated_user_list=$(perform_database_operation "$mutation")
         msg_done
     else
@@ -254,6 +249,9 @@ msg_prompt_email()           { echo "Email:"; }
 msg_prompt_password()        { echo "Password:"; }
 msg_prompt_confirm_pwd()     { echo "Confirm password:"; }
 msg_prompt_user_number()     { echo "Enter user number:"; }
+msg_confirm_enable()         { echo "Enable this user?"; }
+msg_confirm_disable()        { echo "Disable this user?"; }
+msg_warn_delete()            { echo "Delete permanently? This cannot be undone."; }
 
 msg_email_invalid()          { echo "Invalid email, must be a valid email, e.g: abc@xyz.tld.
 This is needed to send authentication emails to allow user enrollement.
