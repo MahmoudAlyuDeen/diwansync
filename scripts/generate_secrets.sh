@@ -7,10 +7,10 @@ set -e
 cd "$(dirname "$0")/.."   # repo root
 
 secrets=(
-    "DB_PASSWORD                             ./storage/env/002-immich.env"
-    "AUTHELIA_SESSION_SECRET                 ./storage/env/004-dyngress.env"
-    "AUTHELIA_STORAGE_ENCRYPTION_KEY          ./storage/env/004-dyngress.env"
-    "AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET ./storage/env/004-dyngress.env"
+    "./storage/env/002-immich.env    DB_PASSWORD"
+    "./storage/env/004-dyngress.env  AUTHELIA_SESSION_SECRET"
+    "./storage/env/004-dyngress.env  AUTHELIA_STORAGE_ENCRYPTION_KEY"
+    "./storage/env/004-dyngress.env  AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET"
 )
 
 [ -d ./storage/env ] || { echo "No ./storage/env — run ./setup.sh first."; exit 1; }
@@ -53,7 +53,7 @@ ensure_secret() {
 total=${#secrets[@]}; idx=0
 for entry in "${secrets[@]}"; do
     idx=$((idx + 1))
-    read -r name file <<< "$entry"
+    read -r file name <<< "$entry"
     ensure_secret "$name" "$file" "$idx" "$total"
 done
 
