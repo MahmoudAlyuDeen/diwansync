@@ -16,7 +16,7 @@ services:
       - .env
     volumes:
       - ../../storage/volumes/004-dyngress/authelia:/authelia:rw
-      - ./config:/config:ro
+      - ./authelia/config:/config:ro
 
   004-dyngress-caddy:
     container_name: 004-dyngress-caddy
