@@ -1,7 +1,13 @@
 #!/bin/bash
-# Compile Immich's monuted config from parameters and feature flags under 002-immich.env.
-# Idempotent: rebuilds instance-config.yml = base [+ oauth] [+ smtp] from the current flags.
-# Writes into /compiled/config.yml, ran inside the container.
+# Compiles Immich configuration template with env variables:
+# - config templates:
+#   - <repo>/services/002-immich/config/config-base.yml
+#   - <repo>/services/002-immich/config/config-oauth.yml
+#   - <repo>/services/002-immich/config/config-smtp.yml
+# - env variables: <storage>/env/002-immich.env.
+# - config templates and this compile script are bind mounted under ./config:/config
+# - writes into /compiled/configuration.yml, runs inside the container.
+# - the compiled configuration is ephemeral, it recompiles on every container start.
 set -euo pipefail
 
 # Create the folder directly in container memory
@@ -14,16 +20,16 @@ parse_template() {
 }
 
 echo "Compiling base config..."
-parse_template < /config/template.config.yml > /compiled/config.yml
+parse_template < /config/config-base.yml > /compiled/config.yml
 
 if [ "${ENABLE_OAUTH:-false}" = "true" ]; then
     echo "Compiling OAuth configuration..."
-    parse_template < /config/template.oauth.yml >> /compiled/config.yml
+    parse_template < /config/config-oauth.yml >> /compiled/config.yml
 fi
 
 if [ "${ENABLE_SMTP:-false}" = "true" ]; then
     echo "Compiling SMTP configuration..."
-    parse_template < /config/template.smtp.yml >> /compiled/config.yml
+    parse_template < /config/config-smtp.yml >> /compiled/config.yml
 fi
 
 echo "Configuration successfully compiled at /compiled/config.yml!"
