@@ -6,8 +6,10 @@ services:
       - ../../storage/media/001-filebrowser:/files:rw
       - ../../storage:/storage:rw
       - ../../storage/volumes/001-filebrowser:/home/filebrowser/data
-      - ./config.yaml:/home/filebrowser/data/config.yaml
+      - ./config.yaml:/home/filebrowser/config/config.yaml
+    environment:
+      - FILEBROWSER_CONFIG=/home/filebrowser/config/config.yaml
     ports:
       - '8001:80'
-    image: gtstef/filebrowser:1.4.0-stable
+    image: gtstef/filebrowser:2.0.4-beta
     restart: unless-stopped
