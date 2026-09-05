@@ -8,6 +8,7 @@ services:
     entrypoint: ["sh", "-c", "/config/compile.sh && exec authelia"]
     environment:
       - X_AUTHELIA_CONFIG=/compiled/configuration.yml
+      - AUTHELIA_SERVER_ADDRESS=tcp://0.0.0.0:9004
       - AUTHELIA_STORAGE_LOCAL_PATH=/authelia/db.sqlite3
       - AUTHELIA_AUTHENTICATION_BACKEND_FILE_PATH=/authelia/users_database.yml
       - AUTHELIA_AUTHENTICATION_BACKEND_FILE_WATCH=true
