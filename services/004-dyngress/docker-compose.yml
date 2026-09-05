@@ -5,12 +5,17 @@ services:
     restart: unless-stopped
     ports:
       - "9004:9004"
+    entrypoint: ["sh", "-c", "/config/compile.sh && exec authelia"]
+    environment:
+      - X_AUTHELIA_CONFIG=/compiled/configuration.yml
+      - AUTHELIA_STORAGE_LOCAL_PATH=/authelia/db.sqlite3
+      - AUTHELIA_AUTHENTICATION_BACKEND_FILE_PATH=/authelia/users_database.yml
+      - AUTHELIA_AUTHENTICATION_BACKEND_FILE_WATCH=true
     env_file:
       - .env
     volumes:
-      - ./authelia/configuration.yml:/config/configuration.yml:ro
-      - ../../storage/volumes/004-dyngress/authelia/users_database.yml:/users_database.yml:ro
-      - ../../storage/volumes/004-dyngress/:/opt/authelia/:rw
+      - ../../storage/volumes/004-dyngress/authelia:/authelia:rw
+      - ./config:/config:ro
 
   004-dyngress-caddy:
     container_name: 004-dyngress-caddy

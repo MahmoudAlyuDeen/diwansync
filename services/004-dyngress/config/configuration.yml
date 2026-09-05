@@ -1,0 +1,32 @@
+session:
+  cookies:
+    - domain: '${DOMAIN}'
+      authelia_url: 'https://auth.${DOMAIN}'
+  secret: '${AUTHELIA_SESSION_SECRET}'
+
+access_control:
+  default_policy: '${AUTHELIA_DEFAULT_POLICY}'
+
+identity_validation:
+  reset_password:
+    jwt_secret: '${AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET}'
+
+storage:
+  encryption_key: '${AUTHELIA_STORAGE_ENCRYPTION_KEY}'
+
+webauthn:
+  display_name: 'DiwanAuth'
+  enable_passkey_login: ${AUTHELIA_WEBAUTHN_ENABLE_PASSKEY_LOGIN}
+  experimental_enable_passkey_upgrade: ${AUTHELIA_WEBAUTHN_ENABLE_PASSKEY_LOGIN}
+  experimental_enable_passkey_uv_two_factors: ${AUTHELIA_WEBAUTHN_ENABLE_PASSKEY_LOGIN}
+
+regulation:
+  modes: ['user', 'ip']
+
+notifier:
+  disable_startup_check: ${AUTHELIA_SMTP_DISABLE_STARTUP_CHECK}
+  smtp:
+    address: '${AUTHELIA_SMTP_ADDRESS}'
+    username: '${AUTHELIA_SMTP_USERNAME}'
+    password: '${AUTHELIA_SMTP_PASSWORD}'
+    sender: '${AUTHELIA_SMTP_SENDER}'
