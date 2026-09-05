@@ -29,8 +29,8 @@ services:
       - .env
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ../../storage/volumes/004-dyngress/caddy/data:/data
-      - ../../storage/volumes/004-dyngress/caddy/config:/config
+      - ../../storage/volumes/004-dyngress/caddy/data:/data/caddy
+      - ../../storage/volumes/004-dyngress/caddy/config:/config/caddy
 
   004-dyngress-ddns-updater:
     container_name: 004-dyngress-ddns-updater
