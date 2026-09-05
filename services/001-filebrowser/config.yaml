@@ -1,5 +1,4 @@
 server:
-  port: 80
   sources:
     - path: "/files"
       name: "Files"
