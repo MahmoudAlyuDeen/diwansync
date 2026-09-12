@@ -59,7 +59,7 @@ identity_providers:
 notifier:
   disable_startup_check: ${AUTHELIA_SMTP_DISABLE_STARTUP_CHECK}
   smtp:
-    address: '${AUTHELIA_SMTP_ADDRESS}'
-    username: '${AUTHELIA_SMTP_USERNAME}'
-    password: '${AUTHELIA_SMTP_PASSWORD}'
-    sender: '${AUTHELIA_SMTP_SENDER}'
+    address: 'smtp://${SMTP_HOST}:${SMTP_PORT}'
+    username: '${SMTP_USERNAME}'
+    password: '${SMTP_PASSWORD}'
+    sender: '${SMTP_FROM}'
