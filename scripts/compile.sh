@@ -1,8 +1,7 @@
 #!/bin/sh
-# Compiles Authelia configuration template with env variables:
-# - config template: <repo>/services/004-dyngress/authelia/config/configuration.yml
-# - env variables: <storage>/env/004-dyngress.env.
-# - the config template and this compile script are bind mounted under ./config:/config
+# Compiles configuration template with environment variables.
+# - config template is bind-mounted as /config/configuration.yml
+# - this compile script is bind-mounted as /config/compile.sh
 # - writes into /compiled/configuration.yml, runs inside the container.
 # - the compiled configuration is ephemeral, it recompiles on every container start.
 set -eu
@@ -14,7 +13,8 @@ decode_rsa() { printf '%s' "$1" | base64 -d | sed 's/^/          /'; }
 
 parse_template() {
     while IFS= read -r line || [ -n "$line" ]; do
-        if [ "${line#*AUTHELIA_OIDC_PRIVATE_KEY}" != "$line" ] && [ -n "${AUTHELIA_OIDC_PRIVATE_KEY:-}" ]; then
+        if [ "${AUTHELIA_OIDC_PRIVATE_KEY:-}" ] && \
+           [ "${line#*AUTHELIA_OIDC_PRIVATE_KEY}" != "$line" ]; then
             decode_rsa "${AUTHELIA_OIDC_PRIVATE_KEY}"
         else
             escaped=$(printf '%s' "$line" | sed 's/"/\\"/g')
