@@ -105,7 +105,7 @@ passwordLogin:
 reverseGeocoding:
   enabled: true
 server:
-  externalDomain: "${CONFIG_EXTERNAL_DOMAIN}"
+  externalDomain: "https://immich.${DOMAIN}"
   loginPageMessage: Enter login information
   publicUsers: true
 storageTemplate:
@@ -124,3 +124,30 @@ trash:
   enabled: true
 user:
   deleteDelay: 7
+notifications:
+  smtp:
+    enabled: true
+    from: ${SMTP_FROM}
+    replyTo: ''
+    transport:
+      host: ${SMTP_HOST}
+      ignoreCert: false
+      password: ${SMTP_PASSWORD}
+      port: ${SMTP_PORT}
+      username: ${SMTP_USERNAME}
+oauth:
+  autoLaunch: true
+  autoRegister: false
+  buttonText: Use a security key
+  clientId: immich
+  clientSecret: ${AUTHELIA_IMMICH_OAUTH_CLIENT_SECRET}
+  defaultStorageQuota: 0
+  enabled: true
+  issuerUrl: "https://auth.${DOMAIN}"
+  mobileOverrideEnabled: false
+  mobileRedirectUri: ''
+  profileSigningAlgorithm: none
+  scope: openid profile email
+  signingAlgorithm: RS256
+  storageLabelClaim: username
+  storageQuotaClaim: immich_quota

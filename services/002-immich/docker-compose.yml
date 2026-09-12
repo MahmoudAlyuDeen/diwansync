@@ -19,13 +19,14 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: ["/bin/bash", "-c", "/config/compile.sh && exec start.sh"]
     env_file:
-      - .env
+      - ../../storage/env/004-dyngress.env
+      - ../../storage/env/002-immich.env
     environment:
       IMMICH_CONFIG_FILE: /compiled/config.yml
       DB_HOSTNAME: 002-immich-postgres
       REDIS_HOSTNAME: 002-immich-redis
     ports:
-      - 8002:2283
+      - '8002:2283'
     depends_on:
       - 002-immich-redis
       - 002-immich-postgres
@@ -46,7 +47,8 @@ services:
     volumes:
       - model-cache:/cache
     env_file:
-      - .env
+      - ../../storage/env/004-dyngress.env
+      - ../../storage/env/002-immich.env
     restart: always
     # noinspection ComposeMissingKeys
     # healthcheck is implemented by the image
