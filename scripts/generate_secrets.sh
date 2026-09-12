@@ -7,21 +7,24 @@ set -e
 cd "$(dirname "$0")/.."   # repo root
 
 secrets=(
-    "./storage/env/002-immich.env    DB_PASSWORD"
-    "./storage/env/004-dyngress.env  AUTHELIA_SESSION_SECRET"
-    "./storage/env/004-dyngress.env  AUTHELIA_STORAGE_ENCRYPTION_KEY"
-    "./storage/env/004-dyngress.env  AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET"
+    "hex  ./storage/env/002-immich.env    DB_PASSWORD"
+    "hex  ./storage/env/004-dyngress.env  AUTHELIA_SESSION_SECRET"
+    "hex  ./storage/env/004-dyngress.env  AUTHELIA_STORAGE_ENCRYPTION_KEY"
+    "hex  ./storage/env/004-dyngress.env  AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET"
+    "hex  ./storage/env/004-dyngress.env  AUTHELIA_IMMICH_OAUTH_CLIENT_SECRET"
+    "hex  ./storage/env/004-dyngress.env  AUTHELIA_OIDC_HMAC_SECRET"
+    "rsa  ./storage/env/004-dyngress.env  AUTHELIA_OIDC_PRIVATE_KEY"
 )
 
 [ -d ./storage/env ] || { echo "No ./storage/env — run ./setup.sh first."; exit 1; }
 
 confirm() { local r; read -rp "$1 [y/n] " r; [[ "${r:-n}" == [Yy]* ]]; }
-gen_hex() { openssl rand -hex 24; }
+gen_secret() { if [ "$1" = "rsa" ]; then printf '%s' "$(openssl genrsa 2048 2>/dev/null)" | base64 -w0; else openssl rand -hex 24; fi }
 
 total=${#secrets[@]}; index=0
 for entry in "${secrets[@]}"; do
     index=$((index + 1))
-    read -r file name <<< "$entry"
+    read -r type file name <<< "$entry"
 
     echo ""
     # Check if secret already exists in the target env file.
@@ -39,7 +42,7 @@ Are you sure?"; then
                 echo "Rotating ${name} in ${file}..."
                 sed -i '' "s/^${name}=/# ROTATED: ${name}=/" "$file"
 
-                printf '\n%s=%s\n' "$name" "$(gen_hex)" >> "$file"
+                printf '\n%s=%s\n' "$name" "$(gen_secret "$type")" >> "$file"
                 echo "rotated (old value commented out)"
 
             else
@@ -50,7 +53,7 @@ Are you sure?"; then
             echo "kept, no changes made"
         fi
     else
-        printf '\n%s=%s\n' "$name" "$(gen_hex)" >> "$file"
+        printf '\n%s=%s\n' "$name" "$(gen_secret "$type")" >> "$file"
         echo "[${index}/${total}] ${name} generated in ${file}"
     fi
 done

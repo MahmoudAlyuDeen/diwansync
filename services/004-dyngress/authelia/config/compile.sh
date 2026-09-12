@@ -10,12 +10,19 @@ set -eu
 # Create the folder directly in container memory
 mkdir -p /compiled
 
+decode_rsa() { printf '%s' "$1" | base64 -d | sed 's/^/          /'; }
+
 parse_template() {
     while IFS= read -r line || [ -n "$line" ]; do
-        escaped=$(printf '%s' "$line" | sed 's/"/\\"/g')
-        eval "echo \"$escaped\""
+        if [ "${line#*AUTHELIA_OIDC_PRIVATE_KEY}" != "$line" ] && [ -n "${AUTHELIA_OIDC_PRIVATE_KEY:-}" ]; then
+            decode_rsa "${AUTHELIA_OIDC_PRIVATE_KEY}"
+        else
+            escaped=$(printf '%s' "$line" | sed 's/"/\\"/g')
+            eval "echo \"$escaped\""
+        fi
     done
 }
 
 parse_template < /config/configuration.yml > /compiled/configuration.yml
 echo "Configuration successfully compiled at /compiled/configuration.yml!"
+cat /compiled/configuration.yml
