@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."   # repo root
 
 USERS_DB_PATH="storage/volumes/004-dyngress/authelia/users_database.yml"
-AUTHELIA_DOCKER_IMAGE="authelia/authelia:latest"
+AUTHELIA_DOCKER_IMAGE="authelia/authelia:4.39.26"
 
 # --- menu ------------------------------------------------------------------
 
