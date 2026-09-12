@@ -1,7 +1,7 @@
 services:
   004-dyngress-authelia:
     container_name: 004-dyngress-authelia
-    image: authelia/authelia:latest
+    image: authelia/authelia:${VERSION_AUTHELIA}
     restart: unless-stopped
     ports:
       - "9004:9004"
@@ -21,7 +21,7 @@ services:
 
   004-dyngress-caddy:
     container_name: 004-dyngress-caddy
-    image: caddy:2.11.4-alpine
+    image: caddy:${VERSION_CADDY}
     restart: unless-stopped
     ports:
       - "80:80"
@@ -36,7 +36,7 @@ services:
 
   004-dyngress-ddns-updater:
     container_name: 004-dyngress-ddns-updater
-    image: qmcgaw/ddns-updater:v2.10.0
+    image: qmcgaw/ddns-updater:${VERSION_DDNS_UPDATER}
     restart: unless-stopped
     ports:
       - "8004:8000"

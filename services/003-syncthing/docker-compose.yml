@@ -1,6 +1,6 @@
 services:
   003-syncthing:
-    image: syncthing/syncthing:2.1.2
+    image: syncthing/syncthing:${VERSION_SYNCTHING}
     container_name: 003-syncthing
     hostname: 003-syncthing
     volumes:

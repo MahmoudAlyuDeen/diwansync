@@ -11,7 +11,7 @@ name: immich
 services:
   002-immich-server:
     container_name: 002-immich-server
-    image: ghcr.io/immich-app/immich-server:v2.7.2
+    image: ghcr.io/immich-app/immich-server:${VERSION_IMMICH}
     volumes:
       - ../../storage/volumes/002-immich/upload:/usr/src/app/upload
       - ../../storage/media/002-immich/library:/usr/src/app/upload/library
@@ -41,7 +41,7 @@ services:
     container_name: 002-immich-machine-learning
     # For hardware acceleration, add one of -[armnn, cuda, openvino] to the image tag.
     # Example tag: ${IMMICH_VERSION:-release}-cuda
-    image: ghcr.io/immich-app/immich-machine-learning:v2.7.2
+    image: ghcr.io/immich-app/immich-machine-learning:${VERSION_IMMICH}
     # extends: # uncomment this section for hardware acceleration - see https://immich.app/docs/features/ml-hardware-acceleration
     #   file: hwaccel.ml.yml
     #   service: cpu # set to one of [armnn, cuda, openvino, openvino-wsl] for accelerated inference - use the `-wsl` version for WSL2 where applicable
@@ -58,14 +58,14 @@ services:
 
   002-immich-redis:
     container_name: 002-immich-redis
-    image: docker.io/redis:6.2-alpine@sha256:e3b17ba9479deec4b7d1eeec1548a253acc5374d68d3b27937fcfe4df8d18c7e
+    image: docker.io/redis:${VERSION_REDIS}
     healthcheck:
       test: redis-cli ping || exit 1
     restart: always
 
   002-immich-postgres:
     container_name: 002-immich-postgres
-    image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
+    image: ghcr.io/immich-app/postgres:${VERSION_POSTGRES}
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_USER: ${DB_USERNAME}

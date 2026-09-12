@@ -11,5 +11,5 @@ services:
       - FILEBROWSER_CONFIG=/home/filebrowser/config/config.yaml
     ports:
       - '8001:80'
-    image: gtstef/filebrowser:2.0.4-beta
+    image: gtstef/filebrowser:${VERSION_FILEBROWSER}
     restart: unless-stopped
