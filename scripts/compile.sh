@@ -11,11 +11,19 @@ mkdir -p /compiled
 
 decode_rsa() { printf '%s' "$1" | base64 -d | sed 's/^/          /'; }
 
+hash_client_secret() {
+    if [ -n "${AUTHELIA_IMMICH_OAUTH_CLIENT_SECRET:-}" ]; then
+        authelia crypto hash generate pbkdf2 --password "$AUTHELIA_IMMICH_OAUTH_CLIENT_SECRET" 2>/dev/null | sed -n 's/^Digest: //p'
+    fi
+}
+
 parse_template() {
     while IFS= read -r line || [ -n "$line" ]; do
         if [ "${AUTHELIA_OIDC_PRIVATE_KEY:-}" ] && \
-           [ "${line#*AUTHELIA_OIDC_PRIVATE_KEY}" != "$line" ]; then
+           echo "$line" | grep -q "AUTHELIA_OIDC_PRIVATE_KEY"; then
             decode_rsa "${AUTHELIA_OIDC_PRIVATE_KEY}"
+        elif echo "$line" | grep -q "client_secret:"; then
+            printf '        client_secret: '\''%s'\''\n' "$(hash_client_secret)"
         else
             escaped=$(printf '%s' "$line" | sed 's/"/\\"/g')
             eval "echo \"$escaped\""
