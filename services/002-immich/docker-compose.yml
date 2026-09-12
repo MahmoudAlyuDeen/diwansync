@@ -15,14 +15,15 @@ services:
     volumes:
       - ../../storage/volumes/002-immich/upload:/usr/src/app/upload
       - ../../storage/media/002-immich/library:/usr/src/app/upload/library
-      - ./config:/config:ro
+      - ./configuration.yml:/config/configuration.yml:ro
+      - ../../scripts/compile.sh:/config/compile.sh:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: ["/bin/bash", "-c", "/config/compile.sh && exec start.sh"]
+    entrypoint: ["/bin/sh", "-c", "/config/compile.sh && exec start.sh"]
     env_file:
       - ../../storage/env/004-dyngress.env
       - ../../storage/env/002-immich.env
     environment:
-      IMMICH_CONFIG_FILE: /compiled/config.yml
+      IMMICH_CONFIG_FILE: /compiled/configuration.yml
       DB_HOSTNAME: 002-immich-postgres
       REDIS_HOSTNAME: 002-immich-redis
     ports:
