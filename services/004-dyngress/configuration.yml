@@ -32,6 +32,16 @@ identity_providers:
         key: |
           ${AUTHELIA_OIDC_PRIVATE_KEY}
 
+    cors:
+      allowed_origins:
+        - 'https://immich.${DOMAIN}'
+      endpoints:
+        - 'authorization'
+        - 'token'
+        - 'revocation'
+        - 'introspection'
+      allowed_origins_from_client_redirect_uris: false
+
     clients:
       - client_id: 'immich'
         client_name: 'immich'
@@ -43,6 +53,11 @@ identity_providers:
         redirect_uris:
           - 'https://immich.${DOMAIN}/auth/login'
           - 'https://immich.${DOMAIN}/user-settings'
+          - 'https://immich.${DOMAIN}'
+          - 'https://immich.${DOMAIN}/oauth2/callback'
+          - 'https://immich.${DOMAIN}/api/oauth/mobile-redirect'
+          - 'https://auth.${DOMAIN}/'
+          - 'https://auth.${DOMAIN}/oauth2/callback'
           - 'app.immich:///oauth-callback'
         scopes:
           - 'openid'
