@@ -144,8 +144,8 @@ oauth:
   defaultStorageQuota: 0
   enabled: true
   issuerUrl: "https://auth.${DOMAIN}"
-  mobileOverrideEnabled: false
-  mobileRedirectUri: ''
+  mobileOverrideEnabled: true
+  mobileRedirectUri: 'https://immich.${DOMAIN}/api/oauth/mobile-redirect'
   profileSigningAlgorithm: none
   scope: openid profile email
   signingAlgorithm: RS256
