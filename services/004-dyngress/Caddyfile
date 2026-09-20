@@ -20,14 +20,20 @@ files.{$DOMAIN} {
 immich.{$DOMAIN} {
 	tls {$CADDY_TLS}
 
-	# Public share links — no auth required (authelia handles CSRF via referer).
-	handle_path /share* {
-		reverse_proxy 002-immich-server:2283
-	}
-
-	# Everything else requires forward-auth
+	# Web clients — Authelia handles authentication
 	forward_auth 004-dyngress-authelia:9004 {
 		uri /api/authz/forward-auth
+	}
+	reverse_proxy 002-immich-server:2283
+}
+
+app.immich.{$DOMAIN} {
+	# Mobile app — strict mTLS, bypasses Authelia entirely
+	tls {$CADDY_TLS} {
+		client_auth {
+			mode require
+			trust_pool file /keys/002-immich-server.crt
+		}
 	}
 	reverse_proxy 002-immich-server:2283
 }

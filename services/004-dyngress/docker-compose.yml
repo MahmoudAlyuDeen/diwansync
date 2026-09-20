@@ -33,6 +33,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ../../storage/volumes/004-dyngress/caddy/data:/data/caddy
       - ../../storage/volumes/004-dyngress/caddy/config:/config/caddy
+      - ../../storage/keys/002-immich-server.crt:/keys/002-immich-server.crt:ro
 
   004-dyngress-ddns-updater:
     container_name: 004-dyngress-ddns-updater
