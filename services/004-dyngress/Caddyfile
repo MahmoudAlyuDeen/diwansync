@@ -58,3 +58,8 @@ auth.{$DOMAIN} {
 	tls {$CADDY_TLS}
 	reverse_proxy 004-dyngress-authelia:9004
 }
+
+{$DOMAIN} {
+	tls {$CADDY_TLS}
+	redir https://auth.{$DOMAIN}{uri} 302
+}
