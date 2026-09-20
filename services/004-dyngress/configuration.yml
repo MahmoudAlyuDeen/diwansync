@@ -68,8 +68,7 @@ identity_providers:
         grant_types:
           - 'authorization_code'
         access_token_signed_response_alg: 'none'
-        userinfo_signed_response_alg: 'none'
-        token_endpoint_auth_method: 'client_secret_basic'
+        userinfo_signed_response_alg: 'RS256'
 
 notifier:
   disable_startup_check: ${AUTHELIA_SMTP_DISABLE_STARTUP_CHECK}
