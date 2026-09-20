@@ -51,7 +51,7 @@ ddns.{$DOMAIN} {
 	forward_auth 004-dyngress-authelia:9004 {
 		uri /api/authz/forward-auth
 	}
-	reverse_proxy 004-ddns-updater:8000
+	reverse_proxy 004-dyngress-ddns-updater:8000
 }
 
 auth.{$DOMAIN} {
