@@ -33,4 +33,3 @@ parse_template() {
 
 parse_template < /config/configuration.yml > /compiled/configuration.yml
 echo "Configuration successfully compiled at /compiled/configuration.yml!"
-cat /compiled/configuration.yml
