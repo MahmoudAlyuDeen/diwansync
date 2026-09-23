@@ -1,0 +1,275 @@
+#!/bin/bash
+set -euo pipefail
+cd "$(dirname "$0")/.."   # repo root
+
+USERS_DB_PATH="storage/volumes/004-dyngress/authelia/users_database.yml"
+AUTHELIA_DOCKER_IMAGE="authelia/authelia:4.39.26"
+
+# --- menu ------------------------------------------------------------------
+
+print_user_list() {
+    local user_list="$1"
+
+    clear   # wipe screen before re-rendering table
+
+    echo "$USERS_DB_PATH"
+    echo ""
+
+    if [ -n "$user_list" ]; then
+        printf "no. DISABLED\tEMAIL\n"
+        echo ""
+        printf '%s\n' "$user_list"
+    else
+        echo "- no users yet"
+    fi
+
+    # Pass same raw param to menu
+    menu "$user_list"
+}
+
+menu() {
+    local user_list="$1"
+
+    if [[ -n "$user_list" ]]; then
+        echo ""
+        echo "↓ Choose an action ↓"
+        echo "1) Add a user"
+        echo "2) Reset a user password"
+        echo "3) Enable a user"
+        echo "4) Disable a user"
+        echo "5) Delete a user"
+        echo "6) Quit"
+
+        while true; do
+            local CHOICE
+            read -rp "Choose [1-6]: " CHOICE
+            case "$CHOICE" in
+                1) create "$user_list"; break ;;
+                2) reset_password "$user_list"; break ;;
+                3) enable_user "$user_list"; break ;;
+                4) disable_user "$user_list"; break ;;
+                5) delete_user "$user_list"; break ;;
+                6) exit 0 ;;
+                *) msg_invalid_choice ;;
+            esac
+        done
+
+    else
+        echo ""
+        echo "↓ Choose an action ↓"
+        echo "1) Add a user"
+        echo "2) Quit"
+
+        while true; do
+            local CHOICE
+            read -rp "Choose [1-2]: " CHOICE
+            case "$CHOICE" in
+                1) create "$user_list"; break ;;
+                2) exit 0 ;;
+                *) msg_invalid_choice ;;
+            esac
+        done
+    fi
+}
+
+# --- user operations -------------------------------------------------------
+create() {
+    local user_list="$1"
+    docker ps >/dev/null 2>&1 || { msg_docker_hash_required; return 1; }
+
+    local email_regex='^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+
+    while true; do
+        read -rp "$(msg_prompt_email)" email_input
+        [[ "$email_input" =~ $email_regex ]] || { msg_email_invalid; continue; }
+
+        # Use email as-is for all three fields (lowercased)
+        email_input=$(printf '%s' "$email_input" | tr '[:upper:]' '[:lower:]')
+
+        # Duplicate check against existing user keys in DB
+        [[ "$user_list" == *"$email_input"* ]] && { msg_user_already_exists "$email_input"; continue; }
+        break
+    done
+
+    local HASH=$(get_password_hash_from_input "$(msg_prompt_password)")
+
+    local mutation="user_entries['${email_input}'] = dict(email='$email_input', displayname='${email_input}', disabled=False, password='${HASH}')"
+    updated_user_list=$(perform_database_operation "$mutation")
+    msg_done
+
+    sleep 2
+    print_user_list "$updated_user_list"
+}
+
+reset_password() {
+    local user_list="$1"
+    docker ps >/dev/null 2>&1 || { msg_docker_hash_required; return 1; }
+
+    local selected_user_key=$(select_user "$user_list")
+
+    local HASH=$(get_password_hash_from_input "$(msg_prompt_new_password)")
+
+    local mutation="if \"${selected_user_key}\" in user_entries: user_entries[\"${selected_user_key}\"][\"password\"] = \"${HASH}\""
+    updated_user_list=$(perform_database_operation "$mutation")
+    msg_done
+
+    sleep 2
+    print_user_list "$updated_user_list"
+}
+
+enable_user() {
+    local user_list="$1"
+    local selected_user_key=$(select_user "$user_list")
+    local updated_user_list="$user_list"
+    if confirm "$(msg_confirm_enable)"; then
+        local mutation="if \"${selected_user_key}\" in user_entries: user_entries[\"${selected_user_key}\"][\"disabled\"] = False"
+        updated_user_list=$(perform_database_operation "$mutation")
+        msg_done
+    else
+        msg_cancelled
+    fi
+
+    sleep 2
+    print_user_list "$updated_user_list"
+}
+
+disable_user() {
+    local user_list="$1"
+    local selected_user_key=$(select_user "$user_list")
+    local updated_user_list="$user_list"
+    if confirm "$(msg_confirm_disable)"; then
+        local mutation="if \"${selected_user_key}\" in user_entries: user_entries[\"${selected_user_key}\"][\"disabled\"] = True"
+        updated_user_list=$(perform_database_operation "$mutation")
+        msg_done
+    else
+        msg_cancelled
+    fi
+
+    sleep 2
+    print_user_list "$updated_user_list"
+}
+
+delete_user() {
+    local user_list="$1"
+    local selected_user_key=$(select_user "$user_list")
+    local updated_user_list="$user_list"
+    if confirm "$(msg_warn_delete)"; then
+        local mutation="user_entries.pop(\"${selected_user_key}\", None)"
+        updated_user_list=$(perform_database_operation "$mutation")
+        msg_done
+    else
+        msg_cancelled
+    fi
+
+    sleep 2
+    print_user_list "$updated_user_list"
+}
+
+select_user() {
+    local user_list="$1"
+    while true; do
+        read -rp "$(msg_prompt_user_number) " input_number
+
+        local selected_line=""
+        if [[ $input_number =~ ^[0-9]+$ ]]; then
+            selected_line=$(printf '%s\n' "$user_list" | sed -n "${input_number}p")
+        fi
+
+        [ -z "$selected_line" ] && { msg_invalid_choice >&2; continue; }
+
+        local selected_key; read -r _ _ selected_key <<< "$selected_line"
+        echo "→ Selected: $selected_key" >&2
+        printf '%s\n' "$selected_key"
+        break
+    done
+}
+
+# helpers ---------------------------------------------------------------
+
+confirm() {
+    local response
+    read -rp "$1 [y/n] " response
+    [[ "${response:-n}" == [Yy]* ]]
+}
+
+perform_database_operation() {
+    local output
+    if ! output=$(python3 - "$1" "${USERS_DB_PATH}" << 'PYEOF' 2>&1
+import sys, yaml
+
+database_mutation = sys.argv[1]
+users_database_file = sys.argv[2]
+USERS_KEY = "users"
+
+user_entries = yaml.safe_load(open(users_database_file).read())[USERS_KEY]
+
+if database_mutation:
+    namespace = {
+        "sys": __import__("sys"),
+        "yaml": yaml,
+        "user_entries": user_entries,
+    }
+    exec(database_mutation, {}, namespace)
+    with open(users_database_file, "w", encoding="utf-8") as f:
+        yaml.dump(
+            {USERS_KEY: user_entries},
+            f, default_flow_style=False, allow_unicode=True
+        )
+
+for print_index, (user_key, entry) in enumerate(user_entries.items(), 1):
+    print(f"{print_index:02d}. {str(entry['disabled']).lower()}\t{user_key}")
+PYEOF
+    ); then
+        echo "" >&2
+        msg_db_operation_failed >&2
+        return 1
+    fi
+    printf '%s\n' "$output"
+}
+
+get_password_hash_from_input() {
+    while true; do
+        read -rsp "$1" PASSWORD >&2; echo "" >&2
+        read -rsp "$(msg_prompt_confirm_pwd)" CONFIRM >&2; echo "" >&2
+        [ -n "$PASSWORD" ] && [ "$PASSWORD" = "$CONFIRM" ] && break
+        msg_pwd_mismatch >&2
+    done
+
+    local docker_output
+    echo "Hashing password..." >&2
+    docker_output=$(docker run --rm "$AUTHELIA_DOCKER_IMAGE" \
+          authelia crypto hash generate argon2 \
+          --password "$PASSWORD" --no-confirm 2>&1) || { msg_docker_hash_required >&2; return 1; }
+    printf '%s' "${docker_output#*Digest:}" | tr -d '[:space:]'
+}
+
+# --- display strings -----------------------------------------------------
+msg_done()                   { echo "✓ Done"; }
+
+msg_prompt_email()           { echo "Email:"; }
+msg_prompt_password()        { echo "Password:"; }
+msg_prompt_new_password()    { echo "New password:"; }
+msg_prompt_confirm_pwd()     { echo "Confirm password:"; }
+msg_prompt_user_number()     { echo "Enter user number:"; }
+msg_confirm_enable()         { echo "Enable this user?"; }
+msg_confirm_disable()        { echo "Disable this user?"; }
+msg_warn_delete()            { echo "Delete permanently? This cannot be undone."; }
+
+msg_email_invalid()          { echo "Invalid email, must be a valid email, e.g: abc@xyz.tld.
+This is needed to send authentication emails to allow user enrollement.
+Try again (Ctrl+C to quit)."; }
+
+msg_invalid_choice()         { echo "Invalid choice. Try again (Ctrl+C to quit)."; }
+msg_user_already_exists()    { echo "User '$1' already exists. Try again (Ctrl+C to quit)."; }
+msg_pwd_mismatch()           { echo "✗ Passwords do not match. Try again (Ctrl+C to quit)."; }
+
+msg_db_operation_failed()    { echo "Database operation failed. Please ensure $USERS_DB_PATH exists,
+then run scripts/setup_authelia_user_reorder.sh again or edit it manually."; }
+
+msg_cancelled()              { echo "✓ cancelled"; }
+msg_docker_hash_required()   { echo "✗ Docker is required to generate password hashes.
+Install or start docker then run scripts/setup_authelia_user_reorder.sh again."; }
+
+# --- execution entry point -------------------------------------------------
+user_list=$(perform_database_operation "")
+print_user_list "$user_list"

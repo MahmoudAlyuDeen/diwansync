@@ -1,0 +1,80 @@
+session:
+  cookies:
+    - domain: '${DOMAIN}'
+      authelia_url: 'https://auth.${DOMAIN}'
+  secret: '${AUTHELIA_SESSION_SECRET}'
+
+access_control:
+  default_policy: '${AUTHELIA_DEFAULT_POLICY}'
+
+identity_validation:
+  reset_password:
+    jwt_secret: '${AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET}'
+
+storage:
+  encryption_key: '${AUTHELIA_STORAGE_ENCRYPTION_KEY}'
+
+webauthn:
+  display_name: 'DiwanAuth'
+  enable_passkey_login: ${AUTHELIA_WEBAUTHN_ENABLE_PASSKEY_LOGIN}
+  experimental_enable_passkey_upgrade: ${AUTHELIA_WEBAUTHN_ENABLE_PASSKEY_LOGIN}
+  experimental_enable_passkey_uv_two_factors: ${AUTHELIA_WEBAUTHN_ENABLE_PASSKEY_LOGIN}
+
+regulation:
+  modes: ['user', 'ip']
+
+identity_providers:
+  oidc:
+    hmac_secret: '${AUTHELIA_OIDC_HMAC_SECRET}'
+
+    jwks:
+      - algorithm: 'RS256'
+        key: |
+          ${AUTHELIA_OIDC_PRIVATE_KEY}
+
+    cors:
+      allowed_origins:
+        - 'https://immich.${DOMAIN}'
+      endpoints:
+        - 'authorization'
+        - 'token'
+        - 'revocation'
+        - 'introspection'
+      allowed_origins_from_client_redirect_uris: false
+
+    clients:
+      - client_id: 'immich'
+        client_name: 'immich'
+        client_secret: '${AUTHELIA_IMMICH_OAUTH_CLIENT_SECRET}'
+        public: false
+        authorization_policy: 'one_factor'
+        require_pkce: true
+        pkce_challenge_method: 'S256'
+        redirect_uris:
+          - 'https://immich.${DOMAIN}/auth/login'
+          - 'https://immich.${DOMAIN}/user-settings'
+          - 'https://immich.${DOMAIN}'
+          - 'https://immich.${DOMAIN}/oauth2/callback'
+          - 'https://immich.${DOMAIN}/api/oauth/mobile-redirect'
+          - 'https://auth.${DOMAIN}/'
+          - 'https://auth.${DOMAIN}/oauth2/callback'
+          - 'app.immich:///oauth-callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+        response_types:
+          - 'code'
+        grant_types:
+          - 'authorization_code'
+        token_endpoint_auth_method: 'client_secret_post'
+        access_token_signed_response_alg: 'none'
+        userinfo_signed_response_alg: 'RS256'
+
+notifier:
+  disable_startup_check: ${AUTHELIA_SMTP_DISABLE_STARTUP_CHECK}
+  smtp:
+    address: 'smtp://${SMTP_HOST}:${SMTP_PORT}'
+    username: '${SMTP_USERNAME}'
+    password: '${SMTP_PASSWORD}'
+    sender: '${SMTP_FROM}'

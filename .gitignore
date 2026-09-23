@@ -1,5 +1,6 @@
 # system files
 .ash_history
+.DS_Store
 
 # log fles - nginx
 *.log
@@ -8,5 +9,6 @@
 # update log files - ddns
 updates.json
 
-# merged config files - immich
-merged-config.yml
+# storage pointer (created by setup.sh)
+/storage
+/storage-*backup-*

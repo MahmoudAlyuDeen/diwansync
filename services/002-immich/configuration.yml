@@ -1,0 +1,153 @@
+backup:
+  database:
+    cronExpression: 0 07 * * sun
+    enabled: true
+    keepLastAmount: 10
+ffmpeg:
+  accel: disabled
+  accelDecode: false
+  acceptedAudioCodecs:
+  - aac
+  - mp3
+  - libopus
+  acceptedContainers:
+  - mov
+  - ogg
+  - webm
+  acceptedVideoCodecs:
+  - h264
+  bframes: -1
+  cqMode: auto
+  crf: 23
+  gopSize: 0
+  maxBitrate: '0'
+  preferredHwDevice: auto
+  preset: ultrafast
+  refs: 0
+  targetAudioCodec: aac
+  targetResolution: original
+  targetVideoCodec: h264
+  temporalAQ: false
+  threads: 0
+  tonemap: disabled
+  transcode: disabled
+  twoPass: false
+image:
+  colorspace: p3
+  extractEmbedded: false
+  preview:
+    format: jpeg
+    quality: 80
+    size: 1440
+  thumbnail:
+    format: webp
+    quality: 80
+    size: 250
+job:
+  backgroundTask:
+    concurrency: 5
+  faceDetection:
+    concurrency: 2
+  library:
+    concurrency: 5
+  metadataExtraction:
+    concurrency: 5
+  migration:
+    concurrency: 5
+  notifications:
+    concurrency: 5
+  search:
+    concurrency: 5
+  sidecar:
+    concurrency: 5
+  smartSearch:
+    concurrency: 2
+  thumbnailGeneration:
+    concurrency: 3
+  videoConversion:
+    concurrency: 4
+library:
+  scan:
+    cronExpression: 0 0 * * *
+    enabled: true
+  watch:
+    enabled: false
+logging:
+  enabled: true
+  level: log
+machineLearning:
+  clip:
+    enabled: true
+    modelName: ViT-B-32__openai
+  duplicateDetection:
+    enabled: true
+    maxDistance: 0.01
+  enabled: true
+  facialRecognition:
+    enabled: true
+    maxDistance: 0.5
+    minFaces: 3
+    minScore: 0.7
+    modelName: buffalo_l
+  urls:
+  - http://immich-machine-learning:3003
+map:
+  darkStyle: https://tiles.immich.cloud/v1/style/dark.json
+  enabled: true
+  lightStyle: https://tiles.immich.cloud/v1/style/light.json
+metadata:
+  faces:
+    import: false
+newVersionCheck:
+  enabled: false
+passwordLogin:
+  enabled: true
+reverseGeocoding:
+  enabled: true
+server:
+  externalDomain: "https://immich.${DOMAIN}"
+  loginPageMessage: Enter login information
+  publicUsers: true
+storageTemplate:
+  enabled: true
+  hashVerificationEnabled: true
+  template: "{{y}}-{{MM}}-{{dd}}_{{HH}}-{{mm}}-{{ss}}_{{filename}}"
+templates:
+  email:
+    albumInviteTemplate: ''
+    albumUpdateTemplate: ''
+    welcomeTemplate: ''
+theme:
+  customCss: ''
+trash:
+  days: 30
+  enabled: true
+user:
+  deleteDelay: 7
+notifications:
+  smtp:
+    enabled: true
+    from: ${SMTP_FROM}
+    replyTo: ''
+    transport:
+      host: ${SMTP_HOST}
+      ignoreCert: false
+      password: ${SMTP_PASSWORD}
+      port: ${SMTP_PORT}
+      username: ${SMTP_USERNAME}
+oauth:
+  autoLaunch: true
+  autoRegister: false
+  buttonText: Use a security key
+  clientId: immich
+  clientSecret: ${AUTHELIA_IMMICH_OAUTH_CLIENT_SECRET}
+  defaultStorageQuota: 0
+  enabled: true
+  issuerUrl: "https://auth.${DOMAIN}"
+  mobileOverrideEnabled: true
+  mobileRedirectUri: 'https://immich.${DOMAIN}/api/oauth/mobile-redirect'
+  profileSigningAlgorithm: none
+  scope: openid profile email
+  signingAlgorithm: RS256
+  storageLabelClaim: username
+  storageQuotaClaim: immich_quota

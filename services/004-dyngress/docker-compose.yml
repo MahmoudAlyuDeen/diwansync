@@ -1,0 +1,46 @@
+services:
+  004-dyngress-authelia:
+    container_name: 004-dyngress-authelia
+    image: authelia/authelia:${VERSION_AUTHELIA}
+    restart: unless-stopped
+    ports:
+      - "9004:9004"
+    entrypoint: ["sh", "-c", "/config/compile.sh && exec authelia"]
+    environment:
+      - X_AUTHELIA_CONFIG=/compiled/configuration.yml
+      - AUTHELIA_SERVER_ADDRESS=tcp://0.0.0.0:9004
+      - AUTHELIA_STORAGE_LOCAL_PATH=/authelia/db.sqlite3
+      - AUTHELIA_AUTHENTICATION_BACKEND_FILE_PATH=/authelia/users_database.yml
+      - AUTHELIA_AUTHENTICATION_BACKEND_FILE_WATCH=true
+    env_file:
+      - .env
+    volumes:
+      - ../../storage/volumes/004-dyngress/authelia:/authelia:rw
+      - ./configuration.yml:/config/configuration.yml:ro
+      - ../../scripts/compile.sh:/config/compile.sh:ro
+
+  004-dyngress-caddy:
+    container_name: 004-dyngress-caddy
+    image: caddy:${VERSION_CADDY}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    env_file:
+      - .env
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../../storage/volumes/004-dyngress/caddy/data:/data/caddy
+      - ../../storage/volumes/004-dyngress/caddy/config:/config/caddy
+      - ../../storage/keys/002-immich-server.crt:/keys/002-immich-server.crt:ro
+
+  004-dyngress-ddns-updater:
+    container_name: 004-dyngress-ddns-updater
+    image: qmcgaw/ddns-updater:${VERSION_DDNS_UPDATER}
+    restart: unless-stopped
+    ports:
+      - "8004:8000"
+    environment:
+      PERIOD: ${DDNS_PERIOD}
+      CONFIG: '{"settings":[{"provider":"${DDNS_PROVIDER}","domain":"${DOMAIN}","group":"${DDNS_GROUP}","username":"${DDNS_USERNAME}","password":"${DDNS_PASSWORD}","ip_version":"ipv4"}]}'

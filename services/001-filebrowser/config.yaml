@@ -1,0 +1,28 @@
+server:
+  sources:
+    - path: "/files"
+      name: "Files"
+      config:
+        defaultEnabled: true
+    - path: "/storage"
+      name: "Storage"
+      config:
+        defaultEnabled: true
+auth:
+  methods:
+    noauth: true
+frontend:
+  name: "DiwanSync"
+  styling:
+    customCSS: "reduce-rounded-corners.css"
+userDefaults:
+  ui:
+    darkMode: false
+  listing:
+    viewMode: "list"
+    showHidden: true
+    quickDownload: true
+  sidebar:
+    sticky: true
+  fileViewer:
+    editorQuickSave: true
