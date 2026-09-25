@@ -66,3 +66,7 @@ auth.{$DOMAIN} {
 	tls {$CADDY_TLS}
 	redir https://auth.{$DOMAIN}{uri} 302
 }
+
+http:// {
+	redir https://auth.{$DOMAIN}/ 302
+}
