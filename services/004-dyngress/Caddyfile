@@ -3,6 +3,9 @@
 # Reads DOMAIN and CADDY_TLS from .env. CADDY_TLS=internal serves self-signed
 # certs; set it to an email to get free Let's Encrypt certificates.
 
+# User-maintained sites exposed via this ingress.
+import /etc/caddy/UserCaddyfile
+
 files.{$DOMAIN} {
 	tls {$CADDY_TLS}
 

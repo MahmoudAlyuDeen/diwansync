@@ -1,0 +1,9 @@
+# User-maintained sites — lets your own (non-repo) services use this ingress for online access.
+#
+#   myapp.{$DOMAIN} {
+#       tls {$CADDY_TLS}
+#       reverse_proxy 192.168.1.50:3000
+#   }
+#
+# Don't redefine a host already in servicecaddyfile (duplicate = error).
+# After editing run `docker compose up -d --force-recreate`
