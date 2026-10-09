@@ -91,6 +91,7 @@ handle_mtls() {
     local key_pem="/tmp/_mtls_client.key"
     local cert_pem="/tmp/_mtls_client.crt"
     local serial="/tmp/_mtls_ca.srl"
+    local p12_password="immich"
 
     # Delegate to handle_rsa for new/rotate logic
     handle_rsa "$file" "$name" "$index" "$total" "This will invalidate all existing mobile certificates."
@@ -135,7 +136,7 @@ handle_mtls() {
     # Package PKCS#12 with client cert + CA cert in the bundle
     openssl pkcs12 -export -in "$cert_pem" \
         -inkey "$key_pem" -certfile "$ca_crt_path" \
-        -out "$p12_path" -passout pass:immich 2>/dev/null
+        -out "$p12_path" -passout pass:${p12_password} 2>/dev/null
 
     rm -f "$ca_key" "$serial" "$key_pem" "$cert_pem"
     echo "[${index}/${total}] ${p12_path} ${msg}"
