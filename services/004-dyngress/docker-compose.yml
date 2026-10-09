@@ -44,4 +44,4 @@ services:
       - "8004:8000"
     environment:
       PERIOD: ${DDNS_PERIOD}
-      CONFIG: '{"settings":[{"provider":"${DDNS_PROVIDER}","domain":"${DOMAIN}","group":"${DDNS_GROUP}","username":"${DDNS_USERNAME}","password":"${DDNS_PASSWORD}","ip_version":"ipv4"}]}'
+      CONFIG: '{"settings":[{"provider":"${DDNS_PROVIDER}","domain":"${DOMAIN}","username":"${DDNS_USERNAME}","password":"${DDNS_PASSWORD}","ip_version":"ipv4"}]}'
