@@ -100,11 +100,16 @@ handle_mtls() {
 
     # --- Idempotency: compare current CA public key against existing 002-immich-server.crt ---
     local current_pub=$(printf '%s' "$key_val" | base64 -d | openssl rsa -pubout 2>/dev/null || true)
+    local msg
     if [ -f "$ca_crt_path" ]; then
         local existing_pub=$(openssl x509 -in "$ca_crt_path" -noout -pubkey 2>/dev/null || true)
         if [ "$current_pub" = "$existing_pub" ]; then
-            echo "[${index}/${total}] ${p12_path} up to date — skip"; return
+            echo "[${index}/${total}] ${p12_path} is up to date; existing file continues to authenticate."; return
+        else
+            msg="replaced after rotation; import the new file to maintain authentication."
         fi
+    else
+        msg="generated; import the new file to authenticate."
     fi
 
     if [ -d "$ca_crt_path" ]; then
@@ -123,17 +128,17 @@ handle_mtls() {
     # Generate client key + sign (LibreSSL-compatible pipe)
     openssl genrsa 2048 2>/dev/null > "$key_pem"
     openssl req -new -key "$key_pem" \
-        -subj "/CN=immich-mobile" | openssl x509 -req \
+        -subj "/CN=immich-mobile" 2>/dev/null | openssl x509 -req \
         -CA "$ca_crt_path" -CAkey "$ca_key" \
-        -CAserial "$serial" -CAcreateserial -out "$cert_pem" -days 3650
+        -CAserial "$serial" -CAcreateserial -out "$cert_pem" -days 3650 2>/dev/null
 
     # Package PKCS#12 with client cert + CA cert in the bundle
     openssl pkcs12 -export -in "$cert_pem" \
         -inkey "$key_pem" -certfile "$ca_crt_path" \
-        -out "$p12_path" -passout pass:immich
+        -out "$p12_path" -passout pass:immich 2>/dev/null
 
     rm -f "$ca_key" "$serial" "$key_pem" "$cert_pem"
-    echo "[${index}/${total}] ${p12_path} generated from CADDY_MTLS_CA_PRIVATE_KEY"
+    echo "[${index}/${total}] ${p12_path} ${msg}"
 }
 
 # --- Main loop ----------------------------------------------------------------
