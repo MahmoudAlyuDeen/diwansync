@@ -122,10 +122,10 @@ handle_mtls() {
         -CA "$ca_crt_path" -CAkey "$ca_key" \
         -CAcreateserial -out "$cert_pem" -days 365
 
-    # Package PKCS#12 with client cert + CA cert in the bundle (no password)
+    # Package PKCS#12 with client cert + CA cert in the bundle
     openssl pkcs12 -export -in "$cert_pem" \
         -inkey "$key_pem" -certfile "$ca_crt_path" \
-        -out "$p12_path" -passout pass:
+        -out "$p12_path" -passout pass:immich
 
     rm -f "$ca_key" "$serial" "$key_pem" "$cert_pem"
     echo "[${index}/${total}] ${p12_path} generated from CADDY_MTLS_CA_PRIVATE_KEY"
