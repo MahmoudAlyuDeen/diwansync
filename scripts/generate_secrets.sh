@@ -56,7 +56,7 @@ handle_hex() {
         echo "[${index}/${total}] ${name} generated in ${file}" >&2
     elif prompt_rotation "$line" "$index" "$total"; then
         # rotate — user confirmed
-        sed -i '' "s/^${name}=/# ROTATED: ${name}=/" "$file"
+        perl -pi -e "s/^${name}=/# ROTATED: ${name}=/" "$file"
         printf '\n%s=%s\n' "$name" "$(gen_hex)" >> "$file"
         echo "rotated (old value commented out)" >&2
     fi   # keep — nothing to do
@@ -77,7 +77,7 @@ handle_rsa() {
     elif prompt_rotation "$line" "$index" "$total" "$msg_extra"; then
         # rotate — user confirmed
         val=$(gen_rsa)
-        sed -i '' "s/^${name}=/# ROTATED: ${name}=/" "$file"
+        perl -pi -e "s/^${name}=/# ROTATED: ${name}=/" "$file"
         printf '\n%s=%s\n' "$name" "$val" >> "$file"
         echo "rotated (old value commented out)" >&2
     fi   # keep — nothing to do
