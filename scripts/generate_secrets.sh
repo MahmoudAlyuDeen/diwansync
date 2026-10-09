@@ -107,6 +107,11 @@ handle_mtls() {
         fi
     fi
 
+    if [ -d "$ca_crt_path" ]; then
+        echo "Removing stray directory at $ca_crt_path, happens if docker runs prior to generation"
+        rm -rf "$ca_crt_path"
+    fi
+
     # Decode CA private key from env var value
     printf '%s' "$key_val" | base64 -d > "$ca_key"
 
