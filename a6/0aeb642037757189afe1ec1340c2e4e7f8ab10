@@ -1,0 +1,14 @@
+scripts/generate_secrets.sh
+  h_b3634fe27909ce 59,80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "a60aeb642037757189afe1ec1340c2e4e7f8ab10",
+  "prompts": {},
+  "humans": {
+    "h_b3634fe27909ce": {
+      "author": "AlyuDeen <mahmoud.alyudeen@hungerstation.com>"
+    }
+  }
+}
