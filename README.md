@@ -2,152 +2,66 @@
 
 <img width="800" src="images/diwan.jpg">
 
-```
-Diwān - دِيوَان is a central official registry with a collection of written records.
-```
-
-# Summary
-
-A thin opinionated wrapper of existing open source services. Modular flexible setup, keeping data in plain, browsable, and user controlled, folders instead of hidden Docker volumes.
-
-Runs anywhere Docker does: Linux, macOS, VPS, ...
-
-Default services:
-
-- [Filebrowser Quantum](https://github.com/gtsteffaniak/filebrowser): Simple web-based file manager.
-- [Immich](https://github.com/immich-app/immich): Self-hosted photo & video backup, mobile and web apps.
-
-Optional [opt-in](#5-opt-in-features) services:
-
-- [Syncthing](https://github.com/syncthing/syncthing): Continuous device sync.
-- [Nginx Proxy Manager](https://github.com/NginxProxyManager/nginx-proxy-manager): Reverse proxy & auto certificate generation.
-- [Authentik](https://github.com/goauthentik/authentik): Authentication.
-- [ddns-updater](https://github.com/qdm12/ddns-updater): Automatically sends the host machine IP to DDNS services.
-
----
+*Diwān - دِيوَان is a central official registry with a collection of written records.*
 
 # Getting Started
 
 **First time:**
-1. Check out or download this repo.
-2. Run [`setup.sh`](setup.sh).
-
-The script walks you through choosing where `storage` lives, seeds it from [`storage.template/`](storage.template/), generates secrets under `storage/env`, and offers to bring the stack up with `docker compose up -d`.
+1. Read this readme, really.
+2. Check out or download this repo on a machine with docker.
+3. Run [`setup.sh`](setup.sh)
+4. Select a `storage` path for your data.
+5. Create a user (only needed for remote access, can be done later).
+6. Run `docker compose up -d` on the repo folder.
 
 **Redeployment or restore from backup:**
-1. Check out or download this repo.
-2. Run [`setup.sh`](setup.sh) and pick the *existing folder* option to point `storage` at your backup.
+1. Check out or download this repo on a machine with docker.
+2. Run [`setup.sh`](setup.sh) and pick the *existing folder* and select your `storage` path.
+3. Run `docker compose up -d` on the repo folder.
 
-All configs, secrets, media, and databases are already in place; the script offers to bring the stack up.
+All scripts are idempotent; re-run any of them at any time.
 
----
+# Accessing services locally
 
-# Architecture Overview
+Direct host ports work on the same machine:
+- [localhost:8001](http://localhost:8001): [Filebrowser Quantum](https://github.com/gtsteffaniak/filebrowser).
+- [localhost:8002](http://localhost:8002): [Immich](https://github.com/immich-app/immich)
+- [localhost:8003](http://localhost:8003): [Syncthing](https://github.com/syncthing/syncthing)
+- [localhost:8004](http://localhost:8004): [ddns-updater](https://github.com/qdm12/ddns-updater)
+- [localhost:9004](http://localhost:9004): [Authelia](https://github.com/authelia-dev/authelia)
 
-## 1. Media Organization
+To access services from other devices, replace `localhost` with the machine's LAN IP, its Tailscale IP (VPN), or your DDNS domain (reverse proxy).
 
-Core user data, files and photos, lives in a dedicated `media/` directory under the storage root, completely independent of the services that manage them.
+# Remote access
 
-```
-storage/media/
-  001-filebrowser/   files
-  002-immich/        photos
-```
+### VPN
+VPN is straightforward to setup and works without port forwarding.
+- Install Tailscale on both the host machine and the device you want to access from.
+- Services are remotely accessible **as long as you're on VPN**.
 
-Files are stored with flat, human-readable date-time naming: `2026-07-12_19-23-02_photo.jpg`. No subfolders, no album structures, no year/month organization on disk. The files themselves carry their own metadata and GPS coordinates. Only Immich's search indexes, facial recognition data, and album structures live in the database and are fully disposable. The database can be wiped with zero effect on the user's actual files. Data can be taken completely offline, moved to another service, browsed in any file manager, or migrated to a different photo platform.
+### Reverse proxy
+Reverse proxy is more involved to setup and needs port forwarding and a real email for 2FA. The benefit is accessing services from any phone or browser without needing VPN.
 
-Services are conveniences, not dependencies. You can stop using Immich and your photos are still right there in a folder, organized by date. You can stop using Filebrowser and your files are still right there.
+[Caddy](https://github.com/caddyserver/caddy) fronts every service under your domain and issues the certificates; routes live in [`services/004-dyngress/Caddyfile`](services/004-dyngress/Caddyfile)
 
-## 2. Storage Architecture
+Don't skip 2FA if you'll have a public DDNS domain pointing to your server. Authelia resists brute force attacks but 2FA is more secure. Biometric-enabled devices can use WebAuthn passkeys as a second factor, and if desired it can be used for a one step login.
 
-The repo contains only code and templates. All persistent data lives in one folder you choose — the storage root — kept in plain sight rather than scattered across hidden Docker volumes, so nothing about your data is hard to find, move, or back up. It holds three folders:
+- Configure your server and router to assign the same LAN IP to the server and forward port 443 to it.
+- Get a DDNS domain from any provider; Dynu has a solid free tier.
+- If you skipped user or secret generation during setup, run [scripts/setup_authelia_user.sh](scripts/setup_authelia_user.sh) and [scripts/generate_secrets.sh](scripts/generate_secrets.sh).
+- Fill all fields under `storage/env/004-dyngress.env`, replacing `CADDY_TLS=internal` with a valid email for SSL certificates.
+- Restart the docker stack from the repo root folder: `docker compose up -d --force-recreate`
+- Use `storage/keys/002-immich-mobile.p12` in the immich app, the password is "immich". Tip: use filebrowser from the phone.
 
-- `storage/media` — your actual files and photos
-- `storage/volumes` — service state the apps can rebuild: databases, caches, generated thumbnails and transcodes
-- `storage/env` — configuration and secrets: database passwords, domains and URLs, OAuth credentials, email (SMTP) logins, DDNS tokens, and which services are enabled
+# Storage structure
 
-A `storage` symlink at the repo root points to this directory, created by [`setup.sh`](setup.sh) and untracked so clones never carry a dangling link. This makes all Docker volume mounts resolvable relative to the repo regardless of where the actual data lives: a NAS mount, a second disk, a different machine, or just a regular folder. The symlink is the single point of configuration.
+Everything persistent lives in one folder you choose at setup time, the storage root. Backing up is copying that one folder; to move it, run [`setup.sh`](setup.sh) again.
 
-All persistent files live under one root, making backups trivial; back up the storage path and everything is captured. Each service's non-media data gets its own subdirectory under `volumes/` with no cross-contamination. The `storage.template/volumes/` mirrors this structure with `.gitkeep` files to preserve empty directories.
+- `media/`: your files and photos, one folder per service:
+  - `001-filebrowser/` files.
+  - `002-immich/` photos.
+- `volumes/`: service state (databases, caches, thumbnails, transcodes)
+- `env/`: configuration and installation unique secrets generated during setup, stored in `storage` and never in the repo.
+- `keys/`: mTLS pair for the Immich mobile app.
 
-**Why this matters:**
-- The repo stays clean: no `.gitignore` gymnastics for secrets, no accidental commits of disposable or user data.
-- Persistent Docker data, media files, and user secrets are fully isolated, contained, and grouped under one root.
-- The storage path is completely portable. Change the symlink target and everything follows.
-
-### Volume mounts
-
-Volume mounts use `../../storage/...` relative paths from the service directory. These are bind mounts; they map a host directory directly into the container, persisting whatever the service writes there. For example:
-
-- `003-syncthing`: `../../storage:/storage` (full storage tree for backup)
-- `002-immich`: `../../storage/media/002-immich:/usr/src/app/upload/library` (user photos)
-- `002-immich`: `../../storage/volumes/002-immich/data:/var/lib/postgresql/data` (database files)
-- `002-immich`: `../../storage/volumes/002-immich/instance-config.yml:/config/config.yml` (runtime config)
-
-Volume breakdown by type:
-- `volumes/NNN-name/data` (databases and service state, replaceable, can be rebuilt)
-- `volumes/NNN-name/upload` (generated content: thumbs, profile, encoded video)
-- `volumes/NNN-name/*.yml` (runtime configuration files)
-- `volumes/NNN-name/certs` (SSL certificates and keys)
-- `media/` (canonical home for user files and photos, portable, service-independent)
-
-### Secrets & external configuration
-
-Some services require secrets or config files that cannot be tracked in a public repository: database passwords, API keys, OAuth client credentials, and service-specific configuration like DDNS provider settings. These live in the persistent storage path under `storage/env/NNN-name.env` and `storage/volumes/NNN-name/`, mounted directly into the container. The service directory contains a `.env` symlink pointing to the corresponding file in `storage/env/`.
-
-Secrets never enter the repository, so there is no risk of accidental exposure. All sensitive configuration is grouped under one root for backup and audit. The template files ([`storage.template/env/`](storage.template/env/)) contain placeholder values and documentation, serving as a reference for what each service expects.
-
-The [`scripts/generate_secrets.sh`](scripts/generate_secrets.sh) script auto-generates strong random secrets for services that need them (authentik, immich) and writes them into the storage path. Database passwords use a URL-safe hex alphabet (`openssl rand -hex 24`) so they can't corrupt Postgres connection strings. Re-running it is safe; existing values are shown and kept unless you choose to rotate them.
-
-## 3. Platform & Portability
-
-This setup uses nothing but Docker Compose with standard `include:` directives. It deploys on any system that runs Docker, Mac, Linux, Windows, a potato.
-
-## 4. Service Layout
-
-Services are organized by numeric prefix:
-
-- `001-filebrowser`
-- `002-immich`
-- `003-syncthing`
-- `004-nginx`
-- `005-authentik`
-- `006-ddns`
-
-The numbering is a cross-cutting identifier used consistently across directory names (`services/002-immich/`), port mappings (`8002:2283`), container names (`immich_server`), env file names (`storage.template/env/002-immich.env`), and volume paths (`storage/volumes/002-immich/`).
-
-## 5. Opt-in Features
-
-The stack ships minimal and lets you switch things on as you need them. There are two independent opt-in layers, both driven by plain text files under `storage/env/` — nothing hidden or magic.
-
-### Which services run — Compose profiles
-
-Every service is gated by its own Compose profile, named after its folder: [`001-filebrowser`](services/001-filebrowser/), [`002-immich`](services/002-immich/), [`003-syncthing`](services/003-syncthing/), [`004-nginx`](services/004-nginx/), [`005-authentik`](services/005-authentik/), [`006-ddns`](services/006-ddns/). A service starts only when its profile is active.
-
-The active list is `COMPOSE_PROFILES` in [`000-diwanservices.env`](storage.template/env/000-diwanservices.env), which Docker Compose reads automatically through a repo-root `.env` symlink. The shipped default:
-
-```
-COMPOSE_PROFILES=001-filebrowser,002-immich
-```
-
-So a fresh install runs only Filebrowser and Immich. To add a service, append its name and re-run `docker compose up -d`:
-
-- `003-syncthing` — Syncthing backups
-- `004-nginx`, `005-authentik`, `006-ddns` — the remote-access stack (reverse proxy, SSO, dynamic DNS)
-
-```
-COMPOSE_PROFILES=001-filebrowser,002-immich,003-syncthing,004-nginx
-```
-
-### Which Immich features are on — config snippets
-
-Immich reads one YAML config file. Rather than ship a giant file with everything half-filled (empty values can stop Immich from starting), it is assembled from parts:
-
-- **Base** — [`config.yml`](services/002-immich/config.yml): a complete, working local config. This ships and runs out of the box.
-- **Snippets** — [`config.oauth.snippet.yml`](services/002-immich/config.oauth.snippet.yml) and [`config.smtp.snippet.yml`](services/002-immich/config.smtp.snippet.yml): optional OAuth-login and SMTP-email blocks, kept apart so their empty placeholders can never break startup.
-
-To turn one on, set its flag and fill its values in your `storage/env/002-immich.env` (seeded from [`002-immich.env`](storage.template/env/002-immich.env)) — e.g. `ENABLE_OAUTH=true` plus the `CONFIG_OAUTH_*` lines — then run [`scripts/compile-immich-config.sh`](scripts/compile-immich-config.sh).
-
-That script rebuilds Immich's live config as **base + each enabled snippet**, substituting your values. Re-run it any time: it rebuilds from scratch, so flipping a flag back off cleanly drops that block. On a fresh install, [`scripts/generate_secrets.sh`](scripts/generate_secrets.sh) seeds the base for you, so plain local use needs no compile at all.
-
-Both layers share one idea: the repo ships a working minimum, and everything beyond it is an explicit, file-driven opt-in.
+Immich stores photos flat with date-time names like `2026-07-12_19-23-02_photo.jpg`; metadata and GPS live in the files themselves. Search indexes, faces and albums live only in Immich's database, which is disposable if you stop using it: your photos remain a plain folder you can browse anywhere.
