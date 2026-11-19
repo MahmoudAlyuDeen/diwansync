@@ -60,9 +60,9 @@ services:
 
   002-immich-redis:
     container_name: 002-immich-redis
-    image: docker.io/redis:${VERSION_REDIS}
+    image: docker.io/valkey/valkey:${VERSION_REDIS}
     healthcheck:
-      test: redis-cli ping || exit 1
+      test: redis-cli ping | grep -q PONG || exit 1
     restart: always
 
   002-immich-postgres:
