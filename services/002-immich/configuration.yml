@@ -90,7 +90,7 @@ machineLearning:
     minScore: 0.7
     modelName: buffalo_l
   urls:
-  - http://immich-machine-learning:3003
+  - http://002-immich-machine-learning:3003
 map:
   darkStyle: https://tiles.immich.cloud/v1/style/dark.json
   enabled: true
