@@ -30,8 +30,8 @@ jobs:
               --entrypoint "sh" \
               --env-file storage/env/004-dyngress.env \
               --env-file storage/env/002-immich.env \
-              -v "${template_path}:/config/configuration.yml:ro" \
-              -v "scripts/compile.sh:/config/compile.sh:ro" \
+              -v "${PWD}/${template_path}:/config/configuration.yml:ro" \
+              -v "${PWD}/scripts/compile.sh:/config/compile.sh:ro" \
               -v "${PWD}/${output_dir}:/compiled" \
               "$image" /config/compile.sh
           }
