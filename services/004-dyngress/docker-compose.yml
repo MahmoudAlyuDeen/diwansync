@@ -38,7 +38,7 @@ services:
 
   004-dyngress-ddns-updater:
     container_name: 004-dyngress-ddns-updater
-    image: qmcgaw/ddns-updater:${VERSION_DDNS_UPDATER}
+    image: ghcr.io/qdm12/ddns-updater:${VERSION_DDNS_UPDATER}
     restart: unless-stopped
     ports:
       - "8004:8000"
