@@ -1,0 +1,38 @@
+name: User Management
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  user-management:
+    runs-on: ubuntu-latest
+    env:
+      # The menu renders with clear, which needs a terminal type under set -e.
+      TERM: xterm
+    steps:
+      - uses: actions/checkout@v5
+      - name: Seed storage from template
+        run: cp -R storage.template storage
+      - name: Check the hardcoded image matches VERSION_AUTHELIA
+        run: |
+          set -euo pipefail
+          authelia_version="$(grep '^VERSION_AUTHELIA=' storage/env/004-dyngress.env | cut -d= -f2)"
+          grep -q "authelia/authelia:${authelia_version}" scripts/setup_authelia_user.sh || {
+            echo "::error::setup_authelia_user.sh pins a different authelia version than the env template"
+            exit 1
+          }
+      - name: Ensure PyYAML is available
+        run: python3 -c "import yaml" 2>/dev/null || sudo apt-get install -y python3-yaml
+      # Answers in order: add user, email, password, confirm password, quit.
+      - name: Add a user through the interactive menu
+        run: |
+          set -euo pipefail
+          printf '1\nci-user@example.com\nci-password-one\nci-password-one\n6\n' | ./scripts/setup_authelia_user.sh
+      - name: Assert the user was written with a real hash
+        run: |
+          set -euo pipefail
+          users_database=storage/volumes/004-dyngress/authelia/users_database.yml
+          grep -q 'ci-user@example.com' "$users_database"
+          grep -q '\$argon2' "$users_database"
