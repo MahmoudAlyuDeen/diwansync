@@ -1,0 +1,47 @@
+name: Static Analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # DB_PASSWORD comes from generate_secrets.sh, not the template, so interpolation needs a real seed.
+      - name: Seed storage with generated secrets
+        run: |
+          cp -R storage.template storage
+          ./scripts/generate_secrets.sh </dev/null
+      - name: Check shell scripts (error severity)
+        run: |
+          if ! command -v shellcheck >/dev/null; then
+            sudo apt-get update -y
+            sudo apt-get install -y shellcheck
+          fi
+          shellcheck --severity=error setup.sh scripts/*.sh
+      - name: Validate compose config resolves every variable
+        run: |
+          set -euo pipefail
+          output="$(docker compose config 2>&1)" || { echo "$output"; exit 1; }
+          if grep -qi 'variable is not set' <<<"$output"; then
+            echo "::error::Compose has unresolved variables:"
+            grep -i 'variable is not set' <<<"$output"
+            exit 1
+          fi
+      - name: Check every image tag exists in its registry
+        run: |
+          set -euo pipefail
+          missing=0
+          while IFS= read -r image; do
+            [ -z "$image" ] && continue
+            if docker manifest inspect "$image" >/dev/null 2>&1; then
+              echo "ok: $image"
+            else
+              echo "::error::Image tag not found: $image"
+              missing=1
+            fi
+          done < <(docker compose config --images)
+          [ "$missing" -eq 0 ]

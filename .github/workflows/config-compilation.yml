@@ -1,0 +1,82 @@
+name: Config Compilation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  config-compilation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Seed storage with generated secrets
+        run: |
+          cp -R storage.template storage
+          ./scripts/generate_secrets.sh </dev/null
+      - name: Compile both templates inside the authelia image
+        run: |
+          set -euo pipefail
+          authelia_version="$(grep '^VERSION_AUTHELIA=' storage/env/004-dyngress.env | cut -d= -f2)"
+          image="authelia/authelia:${authelia_version}"
+
+          compile_template() {
+            template_path="$1"
+            output_dir="$2"
+            rm -rf "$output_dir"
+            mkdir -p "$output_dir"
+            # The image's default entrypoint starts the server; force sh to run the compiler like the container does.
+            docker run --rm \
+              --entrypoint "sh" \
+              --env-file storage/env/004-dyngress.env \
+              --env-file storage/env/002-immich.env \
+              -v "${template_path}:/config/configuration.yml:ro" \
+              -v "scripts/compile.sh:/config/compile.sh:ro" \
+              -v "${PWD}/${output_dir}:/compiled" \
+              "$image" /config/compile.sh
+          }
+
+          compile_template services/004-dyngress/configuration.yml ci-compiled/authelia
+          compile_template services/002-immich/configuration.yml ci-compiled/immich
+      - name: Verify compiled output and the cross-service key mapping
+        run: |
+          set -euo pipefail
+          authelia_config="ci-compiled/authelia/configuration.yml"
+          immich_config="ci-compiled/immich/configuration.yml"
+          raw_secret="$(grep '^AUTHELIA_IMMICH_OAUTH_CLIENT_SECRET=' storage/env/004-dyngress.env | cut -d= -f2)"
+
+          # Immich must receive the raw secret; Authelia must hold a PBKDF2 digest, never the raw value.
+          grep -qF "clientSecret: ${raw_secret}" "$immich_config"
+          grep -q "client_secret: '\$pbkdf2" "$authelia_config"
+          ! grep -qF "$raw_secret" "$authelia_config"
+
+          # The digest is self-describing ($pbkdf2-<variant>$iterations$salt$key); recompute it from the raw secret.
+          python3 - "$authelia_config" "$raw_secret" <<'PYEOF'
+          import base64, hashlib, sys
+
+          STANDARD_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+          ADAPTED_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789./"
+          TRANSLATE = str.maketrans(ADAPTED_ALPHABET, STANDARD_ALPHABET)
+
+          def decode_adapted_base64(value):
+              padded = value.translate(TRANSLATE) + "=" * (-len(value) % 4)
+              return base64.b64decode(padded)
+
+          config_path, raw_secret = sys.argv[1], sys.argv[2]
+          digest_line = next(line for line in open(config_path) if "client_secret:" in line).strip()
+          digest_value = digest_line.split(":", 1)[1].strip().strip("'")
+
+          parts = digest_value.split("$")
+          if len(parts) != 5 or parts[0] != "" or not parts[1].startswith("pbkdf2"):
+              sys.exit(f"unexpected pbkdf2 digest format: {digest_value!r}")
+
+          algorithm_name = parts[1].split("-", 1)[1]
+          iterations = int(parts[2])
+          salt = decode_adapted_base64(parts[3])
+          expected_key = decode_adapted_base64(parts[4])
+          computed_key = hashlib.pbkdf2_hmac(algorithm_name, raw_secret.encode(), salt, iterations, len(expected_key))
+
+          if computed_key != expected_key:
+              sys.exit("key mapping broken: authelia's compiled digest does not match the raw secret immich sends")
+          print(f"key mapping verified ({algorithm_name}, {iterations} iterations)")
+          PYEOF
