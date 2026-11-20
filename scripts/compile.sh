@@ -4,6 +4,9 @@
 # - this compile script is bind-mounted as /config/compile.sh
 # - writes into /compiled/configuration.yml, runs inside the container.
 # - the compiled configuration is ephemeral, it recompiles on every container start.
+# - bare images only (no bash/envsubst/perl): substitution stays eval-based, POSIX sh + coreutils/sed/grep/base64.
+# - client_secret: (Authelia) and clientSecret: (Immich) are the OAuth client secret keys of both templates.
+# - Authelia's is compiled as a PBKDF2 digest because its file backend stores digests; Immich's passes through raw because it authenticates to Authelia with it.
 set -eu
 
 # Create the folder directly in container memory
