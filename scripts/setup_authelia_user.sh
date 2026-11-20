@@ -264,11 +264,11 @@ msg_user_already_exists()    { echo "User '$1' already exists. Try again (Ctrl+C
 msg_pwd_mismatch()           { echo "✗ Passwords do not match. Try again (Ctrl+C to quit)."; }
 
 msg_db_operation_failed()    { echo "Database operation failed. Please ensure $USERS_DB_PATH exists,
-then run scripts/setup_authelia_user_reorder.sh again or edit it manually."; }
+then run scripts/setup_authelia_user.sh again or edit it manually."; }
 
 msg_cancelled()              { echo "✓ cancelled"; }
 msg_docker_hash_required()   { echo "✗ Docker is required to generate password hashes.
-Install or start docker then run scripts/setup_authelia_user_reorder.sh again."; }
+Install or start docker then run scripts/setup_authelia_user.sh again."; }
 
 # --- execution entry point -------------------------------------------------
 user_list=$(perform_database_operation "")
