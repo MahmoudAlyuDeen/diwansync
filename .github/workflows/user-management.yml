@@ -12,7 +12,7 @@ jobs:
       # The menu renders with clear, which needs a terminal type under set -e.
       TERM: xterm
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Seed storage from template
         run: cp -R storage.template storage
       - name: Check the hardcoded image matches VERSION_AUTHELIA

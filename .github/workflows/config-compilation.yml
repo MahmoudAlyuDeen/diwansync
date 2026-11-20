@@ -9,7 +9,7 @@ jobs:
   config-compilation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Seed storage with generated secrets
         run: |
           cp -R storage.template storage

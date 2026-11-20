@@ -9,7 +9,7 @@ jobs:
   static-analysis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # DB_PASSWORD comes from generate_secrets.sh, not the template, so interpolation needs a real seed.
       - name: Seed storage with generated secrets
         run: |
